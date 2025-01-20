@@ -1,0 +1,7 @@
+:root {
+    --test_color: #48D678
+}
+
+.container {
+    background-color: var(--test_color);
+}
