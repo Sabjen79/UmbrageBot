@@ -1,23 +1,14 @@
-use std::{fs, path::Path, sync::OnceLock};
+use std::sync::OnceLock;
 use rusqlite::Connection;
+
+use crate::config;
 
 pub mod bot_accounts;
 
 static DB_PATH : OnceLock<String> = OnceLock::new();
 
-pub fn initialize(config_path: &str) {
-    DB_PATH.get_or_init(|| format!("{config_path}\\database.db"));
-    let db_path = DB_PATH.get().unwrap();
-
-    if !Path::new(&config_path).exists() {
-        log::warn!("Created new config directory!");
-
-        fs::create_dir_all(config_path).unwrap();
-    }
-
-    if !Path::new(&db_path).exists() {
-        log::warn!("Created new database!");
-    }
+pub fn initialize() {
+    DB_PATH.get_or_init(|| config::config_path("\\database.db"));
 
     get_connection().execute("
         CREATE TABLE IF NOT EXISTS accounts (
