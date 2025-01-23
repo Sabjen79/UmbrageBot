@@ -1,0 +1,15 @@
+:root {
+    --test_color: #48D678;
+
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    background-color: var(--test_color);
+}

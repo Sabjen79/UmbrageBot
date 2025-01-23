@@ -1,14 +1,14 @@
 use std::sync::OnceLock;
 use rusqlite::Connection;
 
-use crate::config;
+use super::config::config_path;
 
 pub mod bot_accounts;
 
 static DB_PATH : OnceLock<String> = OnceLock::new();
 
-pub fn initialize() {
-    DB_PATH.get_or_init(|| config::config_path("\\database.db"));
+pub(super) fn initialize() {
+    DB_PATH.get_or_init(|| config_path("\\database.db"));
 
     get_connection().execute("
         CREATE TABLE IF NOT EXISTS accounts (
@@ -21,6 +21,6 @@ pub fn initialize() {
     ).unwrap();
 }
 
-pub fn get_connection() -> Connection {
+pub(in crate::database) fn get_connection() -> Connection {
     Connection::open(DB_PATH.get().unwrap()).unwrap()
 }

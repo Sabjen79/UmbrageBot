@@ -1,5 +1,5 @@
 use serenity::prelude::*;
-use crate::database;
+use super::get_connection;
 
 #[derive(serde::Serialize)]
 pub struct BotAccount {
@@ -11,7 +11,7 @@ pub struct BotAccount {
 
 #[tauri::command]
 pub fn get_all_accounts() -> Result<Vec<BotAccount>, String> {
-    let conn = database::get_connection();
+    let conn = get_connection();
 
     let mut stmt = conn.prepare(
         "SELECT id, token, name, avatar_url FROM accounts"
@@ -33,7 +33,7 @@ pub fn get_all_accounts() -> Result<Vec<BotAccount>, String> {
 
 #[tauri::command]
 pub async fn insert_account(token: &str) -> Result<(), String> {
-    let conn = database::get_connection();
+    let conn = get_connection();
     let user = get_bot_info(token).await?;
 
     let mut stmt = conn.prepare(
@@ -59,7 +59,7 @@ pub async fn insert_account(token: &str) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn update_account_token(id: &str, new_token: &str) -> Result<(), String> {
-    let conn = database::get_connection();
+    let conn = get_connection();
     let user = get_bot_info(new_token).await?;
 
     if id != user.id {
@@ -78,7 +78,7 @@ pub async fn update_account_token(id: &str, new_token: &str) -> Result<(), Strin
 
 #[tauri::command]
 pub fn delete_account(id: &str) -> Result<(), String> {
-    let conn = database::get_connection();
+    let conn = get_connection();
 
     conn.execute(
         "DELETE FROM accounts WHERE id = ?1",

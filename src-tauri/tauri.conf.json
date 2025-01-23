@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "discord-bot",
+  "productName": "Umbrage Bot",
   "version": "0.1.0",
   "identifier": "sabjen.discord.bot",
   "build": {
@@ -12,9 +12,12 @@
   "app": {
     "windows": [
       {
-        "title": "discord-bot",
+        "title": "Umbrage Bot",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "minWidth": 800,
+        "minHeight": 600,
+        "decorations": false
       }
     ],
     "security": {

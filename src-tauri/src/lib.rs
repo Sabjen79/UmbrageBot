@@ -1,7 +1,7 @@
 use tauri::Manager;
 
-mod config;
 mod logging;
+mod config;
 mod database;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -20,9 +20,9 @@ pub fn run() {
         .setup(|app| {
             let config_path = format!("{}\\UmbrageBot", app.path().config_dir().unwrap().to_str().unwrap());
             
-            logging::init(&config_path).unwrap();
-
-            // TODO: Database should be in config!
+            // May this function never panic for the sake of my sanity
+            logging::init(&config_path).unwrap(); 
+            
             config::initialize(&config_path);
             database::initialize();
             
