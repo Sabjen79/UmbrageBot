@@ -1,4 +1,10 @@
-use std::{error::Error, fs::{self, OpenOptions}, io::Write, sync::OnceLock, time::{SystemTime, UNIX_EPOCH}};
+use std::{
+    error::Error,
+    fs::{self, OpenOptions},
+    io::Write,
+    sync::OnceLock,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 static LOG_FILE: OnceLock<String> = OnceLock::new();
 
@@ -26,14 +32,16 @@ pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
     if !fs::exists(&dir_path)? {
         fs::create_dir(&dir_path)?;
     }
-    
+
     for file in fs::read_dir(&dir_path)? {
         let file = file?;
         let st: String = file.file_name().to_str().unwrap().chars().skip(5).collect();
 
         let date: u128 = match st.parse() {
             Ok(d) => d,
-            Err(_) => { continue; }
+            Err(_) => {
+                continue;
+            }
         };
 
         let difference: u128 = 604_800_000; // 7 days
@@ -41,7 +49,7 @@ pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
             fs::remove_file(file.path())?;
         }
     }
-    
+
     LOG_FILE.get_or_init(|| format!("{}\\logs_{}.txt", &dir_path, current_time));
 
     info("Logging Initialized!");
@@ -70,4 +78,3 @@ fn write(message: &str, level: &str) -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
-

@@ -1,13 +1,26 @@
 :root {
-    --test_color: #48D678;
+    --titlebar-height: 30px;
+
+    --foreground: light-dark(#0F0F13, #EAEAEE);
+    --background: light-dark(#EAEBF9, #0F0F13);
+    --primary: light-dark(#353ECA, #353ECA);
+    --secondary: light-dark(#95A4C5, #384769);
+    --accent: light-dark(#2E35A3, #5C63D0);
+
+    --gray: color-mix(in hsl, var(--background), var(--foreground) 60%);
+
+    color-scheme: dark;
 
     margin: 0;
+    margin-top: var(--titlebar-height);
     padding: 0;
 }
 
 body {
     margin: 0;
     padding: 0;
+
+    background-color: var(--background);
 }
 
 .container {

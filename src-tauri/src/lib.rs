@@ -1,12 +1,13 @@
 use tauri::Manager;
 
-mod logging;
 mod config;
 mod database;
+mod logging;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
@@ -18,17 +19,19 @@ pub fn run() {
             database::bot_accounts::delete_account
         ])
         .setup(|app| {
-            let config_path = format!("{}\\UmbrageBot", app.path().config_dir().unwrap().to_str().unwrap());
-            
+            let config_path = format!(
+                "{}\\UmbrageBot",
+                app.path().config_dir().unwrap().to_str().unwrap()
+            );
+
             // May this function never panic for the sake of my sanity
-            logging::init(&config_path).unwrap(); 
-            
+            logging::init(&config_path).unwrap();
+
             config::initialize(&config_path);
             database::initialize();
-            
+
             Ok(())
-         })
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-    
 }
