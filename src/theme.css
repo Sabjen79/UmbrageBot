@@ -1,3 +1,18 @@
+@font-face {
+    font-family: "SourceSans";
+    src: url(assets/fonts/SourceSans3-VariableFont_wght.ttf);
+}
+
+@font-face {
+    font-family: "SourceSans";
+    font-style: italic;
+    src: local("assets/fonts/SourceSans3-Italic-VariableFont_wght.ttf");
+}
+
+* {
+    font-family: "SourceSans";
+}
+
 :root {
     --titlebar-height: 30px;
 
