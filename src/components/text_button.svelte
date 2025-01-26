@@ -1,7 +1,8 @@
 <script lang="ts">
     let {
         label = "Text Button",
-        color = "var(--primary)"
+        color = "var(--primary)",
+        onclick
     } = $props();
 
     let hover = $state(false);
@@ -15,6 +16,7 @@
     onmouseleave={() => { hover = false; pressed = false; }}
     onmousedown={() => { pressed = true; }}
     onmouseup={() => { pressed = false; }}
+    onclick={onclick}
 >
     <div id="content">{label}</div>
     <div 

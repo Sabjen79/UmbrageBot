@@ -32,6 +32,7 @@
   svg {
     margin: auto;
     width: 100%;
+    height: 100%;
     position: absolute;
     overflow: visible;
 
@@ -45,6 +46,7 @@
 
   svg:nth-of-type(2) {
     width: 50%;
+    height: 50%;
     stroke-width: 20px;
     stroke-dasharray: 100;
     animation-direction: reverse;

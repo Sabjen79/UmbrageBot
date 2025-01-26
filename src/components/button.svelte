@@ -2,7 +2,8 @@
     import LoadingSpinner from "./loading_spinner.svelte";
 
     let {
-        label = "Button Test",
+        text,
+        icon = "",
         fontSize = "1em",
         onclick = async () => {
             await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -41,10 +42,25 @@
     <div id="spinner" class={classList}>
         <LoadingSpinner color="var(--primary)" />
     </div>
-    <div id="content" class={classList}>{label}</div>
+    <div id="content" class={classList}>
+        {#if icon != ""}
+            <span class="material-symbols-outlined" style="font-size: calc({fontSize}*1.5);">
+                {icon}
+            </span>
+        {/if}
+        {text}
+    </div>
 </button>
 
 <style>
+    .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+    }
+
     #container {
         position: relative;
         display: inline-flex;
@@ -150,6 +166,10 @@
     }
 
     #content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
         float: left;
         padding: 2px 8px;
         margin: 5px 4px 4px 4px;
@@ -159,6 +179,10 @@
         transition: 0.1s;
     }
 
+    #content > span {
+        margin: 0 4px 0 -6px;
+    }
+
     #content.waiting {
         opacity: 0;
     }
@@ -166,9 +190,9 @@
     #spinner {
         position: absolute;
         top: 0;
-        bottom: 0;
-        left: 34%;
-        right: 34%;
+        bottom: 4px;
+        left: 0;
+        right: 0;
 
         opacity: 0;
 

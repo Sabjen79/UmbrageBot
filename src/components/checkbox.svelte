@@ -21,7 +21,6 @@
         onmouseleave={() => { pressed = false; }}
         onmousedown={() => { pressed = true; }}
         class={{checked, pressed}}
-
     >
         {#each {length: 2} as _, index}
             <svg
@@ -40,7 +39,12 @@
     </button>
 
     {#if label != ""}
-        <div id="label">{label}</div>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+         <!-- Accesibility controls available for button -->
+        <div id="label" onclick={() => {checked = !checked}}>
+            {label}
+        </div>
     {/if}
 </div>
 
@@ -108,5 +112,10 @@
 
     #label {
         margin: 0.5px 3px 0 3px;
+        user-select: none;
+    }
+
+    #label:hover {
+        cursor: default;
     }
 </style>
