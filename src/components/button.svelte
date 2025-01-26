@@ -1,44 +1,33 @@
 <script lang="ts">
     import LoadingSpinner from "./loading_spinner.svelte";
 
-    let { 
-        label = 'Button Test',
+    let {
+        label = "Button Test",
+        fontSize = "1em",
         onclick = async () => {
-            await new Promise(resolve => setTimeout(resolve, 3000));
-        }
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+        },
     } = $props();
 
     let hover = $state(false);
     let pressed = $state(false);
     let waiting = $state(false);
 
-    let classList = $derived(
-        (hover ? "hover " : " ") + 
-        (pressed ? "pressed " : " ") + 
-        (waiting ? "waiting " : " ")
-    );
+    let classList = $derived({hover, pressed, waiting});
 </script>
 
-<button id="container"
+<button
+    id="container"
     class={classList}
-    onmouseenter={() => {
-        hover = true;
-    }}
-    onmouseleave={() => {
-        hover = false;
-        pressed = false;
-    }}
-    onmousedown={() => {
-        pressed = true;
-    }}
-    onmouseup={() => {
-        pressed = false;
-    }}
+    style="font-size: {fontSize};"
+    onmouseenter={() => { hover = true; }}
+    onmouseleave={() => { hover = false; pressed = false; }}
+    onmousedown={() => { pressed = true; }}
+    onmouseup={() => { pressed = false; }}
     onclick={async () => {
-        if(waiting) return;
-        
+        if (waiting) return;
 
-        if(onclick instanceof (async () => {}).constructor) {
+        if (onclick instanceof (async () => {}).constructor) {
             waiting = true;
             await onclick();
             waiting = false;
@@ -49,10 +38,10 @@
 >
     <div id="border1" class={classList}></div>
     <div id="border2" class={classList}></div>
+    <div id="spinner" class={classList}>
+        <LoadingSpinner color="var(--primary)" />
+    </div>
     <div id="content" class={classList}>{label}</div>
-    <div id="spinner" class={classList}><LoadingSpinner color="var(--primary)"/></div>
-    
-    
 </button>
 
 <style>
@@ -61,17 +50,24 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        
+
         overflow: visible;
         margin: 5px;
         padding: 0;
         border: none;
         background-color: transparent;
         float: left;
+
+        transition: 0.2s;
     }
 
     #container.hover:not(.waiting) {
         cursor: pointer;
+    }
+
+    #container.pressed,
+    #container.waiting {
+        transform: translateY(2px);
     }
 
     #border1 {
@@ -138,7 +134,7 @@
         right: 2px;
 
         border: solid 2px var(--primary);
-        box-shadow: 0px 7px 10px black ;
+        box-shadow: 0px 0px 10px black;
         opacity: 1;
     }
 
@@ -157,8 +153,6 @@
         float: left;
         padding: 2px 8px;
         margin: 5px 4px 4px 4px;
-        
-        font-size: 1.2em;
 
         background-color: transparent;
         opacity: 1;
@@ -180,7 +174,7 @@
 
         transition: 0.3s ease-in-out;
 
-        scale: 1.5;
+        scale: 0.5;
     }
 
     #spinner.waiting {
