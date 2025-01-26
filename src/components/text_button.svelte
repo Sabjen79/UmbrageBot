@@ -12,7 +12,7 @@
     id="container" 
     style="color: {color}"
     onmouseenter={() => { hover = true; }}
-    onmouseleave={() => { hover = false; }}
+    onmouseleave={() => { hover = false; pressed = false; }}
     onmousedown={() => { pressed = true; }}
     onmouseup={() => { pressed = false; }}
 >

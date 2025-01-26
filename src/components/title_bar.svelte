@@ -3,6 +3,7 @@
 </script>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
 <div data-tauri-drag-region class="titlebar">
     <button class="titlebar-button" id="titlebar-minimize" onclick={getCurrentWindow().minimize}>
@@ -23,6 +24,14 @@
 </div>
 
 <style>
+    .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 300,
+        'GRAD' 0,
+        'opsz' 24
+    }
+
     .titlebar {
         height: var(--titlebar-height);
         background: transparent;
