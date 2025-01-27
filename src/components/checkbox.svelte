@@ -1,7 +1,5 @@
 <script lang="ts">
     let {
-        label = "",
-        alignRight = false,
         checked = $bindable(),
     } = $props();
 
@@ -9,10 +7,7 @@
 
 </script>
 
-<div 
-    id="container" 
-    style="flex-direction: {alignRight ? "row-reverse" : "row"}"
->
+<div id="container" >
     <button id="checkbox" 
         onclick={() => {
             checked = !checked;
@@ -25,10 +20,10 @@
         {#each {length: 2} as _, index}
             <svg
             viewBox="-5 0 210 173.20508075688772"
-            stroke={index == 0 ? "transparent" : "var(--foreground)"}
+            stroke={index == 0 ? "var(--gray)" : "var(--foreground)"}
             stroke-width=10
             ><path
-                fill={index == 0 ? "var(--primary)" : "transparent"}
+                fill={index == 0 ? "var(--secondary)" : "var(--primary)"}
                 d="M0 86.60254037844386L50 0L150 0L200 86.60254037844386L150 173.20508075688772L50 173.20508075688772Z"
             ></path></svg
             >
@@ -37,15 +32,6 @@
             check
         </span>
     </button>
-
-    {#if label != ""}
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-         <!-- Accesibility controls available for button -->
-        <div id="label" onclick={() => {checked = !checked}}>
-            {label}
-        </div>
-    {/if}
 </div>
 
 <style>
@@ -59,9 +45,11 @@
 
     #container {
         display: inline-flex;
+        justify-content: space-between;
 
         height: 24px;
         clip-path: none;
+        user-select: none;
     }
 
     #checkbox {
@@ -95,27 +83,18 @@
         height: 24px;
     }
 
-    svg:first-of-type, span {
+    svg:last-of-type, span {
         clip-path: circle(0);
 
         transition: 0.15s ease-out;
     }
 
-    .checked > svg:first-of-type, .checked > span {
+    .checked > svg:last-of-type, .checked > span {
         clip-path: circle(100%);
     }
 
     span {
         color: var(--foreground);
         font-size: 1.2em;
-    }
-
-    #label {
-        margin: 0.5px 3px 0 3px;
-        user-select: none;
-    }
-
-    #label:hover {
-        cursor: default;
     }
 </style>

@@ -23,6 +23,7 @@
     --accent: light-dark(#2E35A3, #5C63D0);
 
     --gray: color-mix(in hsl, var(--background), var(--foreground) 60%);
+    --darkgray: color-mix(in hsl, var(--background), var(--foreground) 30%);
 
     color-scheme: dark;
 
