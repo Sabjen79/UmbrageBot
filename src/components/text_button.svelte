@@ -1,7 +1,6 @@
 <script lang="ts">
     let {
         label = "Text Button",
-        color = "var(--primary)",
         onclick
     } = $props();
 
@@ -11,7 +10,6 @@
 
 <button 
     id="container" 
-    style="color: {color}"
     onmouseenter={() => { hover = true; }}
     onmouseleave={() => { hover = false; pressed = false; }}
     onmousedown={() => { pressed = true; }}
@@ -20,8 +18,7 @@
 >
     <div id="content">{label}</div>
     <div 
-        id="border" 
-        style="background-color: {color}"
+        id="border"
         class={{hover, pressed}}
     >{label}</div>
 </button>
@@ -35,6 +32,8 @@
         background-color: transparent;
         border: 0;
         font-size: inherit;
+        font-weight: 500;
+        color: var(--accent);
     }
 
     #container:hover {
@@ -49,6 +48,7 @@
         right: 0;
 
         color: var(--background);
+        background-color: var(--accent);
         user-select: none;
 
         clip-path: polygon(50% 90%, 50% 90%, 50% 85%, 50% 85%);
@@ -62,6 +62,7 @@
 
     #border.pressed {
         clip-path: polygon(0% 90%, 100% 90%, 100% 10%, 0% 10%);
+        background-color: var(--primary);
         transition: 0.05s ease-in-out;
     }
 </style>

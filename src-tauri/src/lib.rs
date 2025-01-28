@@ -1,3 +1,5 @@
+use tokio::time::{sleep, Duration};
+
 use tauri::Manager;
 
 mod config;
@@ -14,6 +16,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
+            validate_input,
             database::bot_accounts::get_all_accounts,
             database::bot_accounts::insert_account,
             database::bot_accounts::update_account_token,
@@ -35,4 +38,14 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+// TODO: Move this elsewhere
+#[tauri::command]
+async fn validate_input(message: &str, validation_type: &str, validation_id: i8) -> Result<i8, String> {
+    if message == "ok" {
+        return Ok(validation_id);
+    }
+
+    Ok(-validation_id)
 }

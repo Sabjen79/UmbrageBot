@@ -5,9 +5,11 @@
   import Checkbox from "../../components/checkbox.svelte";
   import { open } from '@tauri-apps/plugin-shell';
     import ToggleSlider from "../../components/toggle_slider.svelte";
+    import TextInput from "../../components/text_input.svelte";
 
   let checked = $state(false);
   let toggled = $state(false);
+  let text = $state("oks");
 </script>
   
 <TitleBar />
@@ -18,6 +20,9 @@
   }}/>.</div>
   <div class="flex"><Checkbox bind:checked /> WooooW!</div>
   <div><ToggleSlider bind:toggled/></div>
+  <div style="width: 150px;">
+    <TextInput bind:value={text} validation="tye"/>
+  </div>
 </main>
 
 <style>
@@ -28,7 +33,7 @@
   }
 
   div {
-    margin-top: 10px;
+    margin: 5px 0;
   }
 
   .flex {

@@ -61,7 +61,6 @@
         height: 100%;
 
         overflow: visible;
-        
     }
 
     #container:hover {
@@ -75,22 +74,19 @@
         width: 20px;
         scale: 1;
 
-        transform: scaleX(1);
-
         transition: 0.15s ease-out;
+        transform: translate(0px);
     }
 
     #container.pressed > #switch {
-        transform: scaleX(120%);
-        left: 18px;
+        transform: translate(2px);
     }
 
     #container.toggled.pressed > #switch {
-        transform: scaleX(120%);
-        left: 32px;
+        transform: translate(16px);
     }
     
     #container.toggled > #switch {
-        left: 34px;
+        transform: translate(18px);
     }
 </style>

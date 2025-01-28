@@ -126,6 +126,7 @@
         left: 0;
         right: 0;
 
+        background-color: color-mix(in hsl, var(--foreground) 2%, transparent);
         border: solid 1px var(--gray);
         border-radius: 4px;
         box-shadow: 0px 5px 10px black;
