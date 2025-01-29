@@ -108,7 +108,7 @@
 
         opacity: 1;
 
-        border: solid 1px var(--gray);
+        border: solid 1px color-mix(in srgb, var(--gray) 80%, transparent);
     }
 
     #border1.pressed {
@@ -132,7 +132,7 @@
         box-shadow: 0px 5px 10px black;
         opacity: 1;
 
-        transition: 0.15s;
+        transition: 0.3s;
     }
 
     #border2.hover {
@@ -141,6 +141,7 @@
         left: -2px;
         right: -2px;
 
+        transition: 0.15s;
         border: solid 1px var(--gray);
     }
 
@@ -153,6 +154,7 @@
         border: solid 2px var(--primary);
         box-shadow: 0px 0px 10px black;
         opacity: 1;
+        transition: 0.15s;
     }
 
     #border2.waiting {

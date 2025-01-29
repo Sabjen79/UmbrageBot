@@ -6,7 +6,7 @@
     let {
         value = $bindable(""),
         placeholder = "Input Text",
-        validation = "",
+        validationType = "",
     } = $props();
 
     let hover = $state(false);
@@ -22,7 +22,7 @@
 
         await invoke('validate_input', {
             message: value,
-            validationType: validation,
+            validationType: validationType,
             validationId: validationId
         }).then((value) => {
             let v: number = value as number;
@@ -33,7 +33,7 @@
         });
     }
 
-    if(value == "" && validation != "") {
+    if(value == "" && validationType != "") {
         error = true;
     }
 </script>
