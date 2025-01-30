@@ -18,9 +18,34 @@
 :root {
     --titlebar-height: 30px;
 
+    --primary-50: light-dark(#e6f0ff, #e8f0fc);
+    --primary-100: light-dark(#cfdefc, #d2dff9);
+    --primary-200: light-dark(#a2b9f6, #a8bbf0);
+    --primary-300: light-dark(#7990ec, #7f93e6);
+    --primary-400: light-dark(#5265e0, #5769db);
+    --primary-500: light-dark(#333dcd, #333dcd);
+    --primary-600: light-dark(#1f32ad, #2436a8);
+    --primary-700: light-dark(#132a86, #192d80);
+    --primary-800: light-dark(#09205d, #0f2257);
+    --primary-900: light-dark(#031230, #06132d);
+    --primary-950: light-dark(#000a19, #030b17);
+    
+    --gray-50: #eff1f6;
+    --gray-100: #dfe3ec;
+    --gray-200: #bdc5d6;
+    --gray-300: #a0abc0;
+    --gray-400: #818da7;
+    --gray-500: #67748e;
+    --gray-600: #535c6f;
+    --gray-700: #3c424e;
+    --gray-800: #272a30;
+    --gray-900: #0f1012;
+    --gray-950: #070708;
+
+    /* TODO: Implement Light Mode Properly */
     --foreground: light-dark(#0F0F13, #EAEAEE);
-    --background: light-dark(#EAEBF9, #0F0F13);
-    --primary: light-dark(#353ECA, #353ECA);
+    
+    --primary: light-dark(#333DCC, #333DCC);
     --secondary: light-dark(#95A4C5, #384769);
     --accent: light-dark(#2E35A3, #5C63D0);
     --error: light-dark(#de1b1b, #e70000);
@@ -31,17 +56,13 @@
     color-scheme: dark;
 
     margin: 0;
-    margin-top: var(--titlebar-height);
     padding: 0;
+
+    --background: light-dark(var(--gray-50), var(--gray-900));
+    background-color: light-dark(var(--gray-50), var(--gray-950));
 }
 
 body {
     margin: 0;
     padding: 0;
-
-    background-color: var(--background);
-}
-
-.container {
-    background-color: var(--test_color);
 }

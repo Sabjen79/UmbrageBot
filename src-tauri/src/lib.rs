@@ -1,5 +1,3 @@
-use tokio::time::{sleep, Duration};
-
 use tauri::Manager;
 
 mod config;
@@ -43,6 +41,10 @@ pub fn run() {
 // TODO: Move this elsewhere
 #[tauri::command]
 async fn validate_input(message: &str, validation_type: &str, validation_id: i8) -> Result<i8, String> {
+    if validation_type == "" {
+        return Ok(validation_id);
+    }
+
     if message == "ok" {
         return Ok(validation_id);
     }

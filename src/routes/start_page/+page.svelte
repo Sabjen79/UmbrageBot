@@ -1,40 +1,14 @@
 <script lang="ts">
   import TitleBar from "../../components/title_bar.svelte";
-  import TextButton from "../../components/text_button.svelte";
   import Button from "../../components/button.svelte";
-  import Checkbox from "../../components/checkbox.svelte";
-  import { open } from '@tauri-apps/plugin-shell';
-    import ToggleSlider from "../../components/toggle_slider.svelte";
-    import TextInput from "../../components/text_input.svelte";
-    import Dialog from "../../components/dialog.svelte";
-
-  let checked = $state(false);
-  let toggled = $state(false);
-  let text = $state("oks");
-
-  let dialog: Dialog;
+  import Dialog from "../../components/dialog.svelte";
 </script>
   
 <TitleBar />
 <main class="container" style="font-size: 1em;">
-  <div><Button text="Hello!" icon="play_arrow" onclick={() => {
-    dialog.open();
-  }}/></div>
-  <div>Find more info by pressing this <TextButton onclick={() => {
-    open("https://discord.com/developers/applications");
-  }}/>.</div>
-  <div class="flex"><Checkbox bind:checked /> WooooW!</div>
-  <div><ToggleSlider bind:toggled/></div>
-  <div style="width: 150px;">
-    <TextInput bind:value={text} validationType="tye"/>
+  <div>
+    <Button text="New Bot" icon="add"/>
   </div>
-  <Dialog bind:this={dialog} width="400px" title="Add a new Bot">
-    <div class="">
-      <Button text="Hello!" onclick={async () => {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-      }}/>
-    </div>
-  </Dialog>
 </main>
 
 <style>
@@ -46,10 +20,5 @@
 
   div {
     margin: 5px 0;
-  }
-
-  .flex {
-    display: flex;
-    align-items: center;
   }
 </style>

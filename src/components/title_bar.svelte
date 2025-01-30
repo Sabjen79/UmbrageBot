@@ -1,5 +1,13 @@
 <script lang="ts">
     import { getCurrentWindow } from "@tauri-apps/api/window";
+
+    let buttonStyle = `
+        inline-flex justify-center items-center 
+        w-0 h-0 my-auto mx-3
+        border-0 bg-transparent text-(--gray) select-none
+        ease-linear duration-200
+        hover:cursor-pointer hover:text-(--foreground)
+    `;
 </script>
 
 <link
@@ -11,27 +19,30 @@
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
 />
 
-<div data-tauri-drag-region class="titlebar">
+<div 
+    data-tauri-drag-region 
+    class="titlebar h-(--titlebar-height) fixed flex justify-end top-0 left-0 right-1 bg-transparent select-none"
+>
     <button
-        class="titlebar-button"
+        class="titlebar-button {buttonStyle}"
         id="titlebar-minimize"
         onclick={getCurrentWindow().minimize}
     >
-        <span class="material-symbols-outlined"> horizontal_rule </span>
+        <span class="material-symbols-outlined !text-base"> horizontal_rule </span>
     </button>
     <button
-        class="titlebar-button"
+        class="titlebar-button {buttonStyle}"
         id="titlebar-maximize"
         onclick={getCurrentWindow().toggleMaximize}
     >
-        <span class="material-symbols-outlined"> check_box_outline_blank </span>
+        <span class="material-symbols-outlined !text-lg"> check_box_outline_blank </span>
     </button>
     <button
-        class="titlebar-button"
+        class="titlebar-button {buttonStyle}"
         id="titlebar-close"
         onclick={getCurrentWindow().close}
     >
-        <span class="material-symbols-outlined text-2xl"> close </span>
+        <span class="material-symbols-outlined !text-xl"> close </span>
     </button>
 </div>
 
@@ -42,43 +53,5 @@
             "wght" 300,
             "GRAD" 0,
             "opsz" 24;
-    }
-
-    .titlebar {
-        height: var(--titlebar-height);
-        background: transparent;
-        user-select: none;
-        display: flex;
-        justify-content: flex-end;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 5px;
-    }
-
-    .titlebar-button {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        border: none;
-        width: 0px;
-        height: 0px;
-        margin: auto 8px;
-
-        background-color: transparent;
-        user-select: none;
-        -webkit-user-select: none;
-        transition: 0.3s;
-        color: var(--gray);
-    }
-
-    span {
-        font-size: 1.3em;
-        vertical-align: middle;
-    }
-
-    .titlebar-button:hover {
-        cursor: pointer;
-        color: var(--foreground);
     }
 </style>

@@ -4,7 +4,6 @@
     let {
         text,
         icon = "",
-        fontSize = "1em",
         onclick = async () => {
             await new Promise((resolve) => setTimeout(resolve, 3000));
         },
@@ -13,18 +12,34 @@
     let hover = $state(false);
     let pressed = $state(false);
     let waiting = $state(false);
-
-    let classList = $derived({hover, pressed, waiting});
 </script>
 
 <button
     id="container"
-    class={classList}
-    style="font-size: {fontSize};"
-    onmouseenter={() => { hover = true; }}
-    onmouseleave={() => { hover = false; pressed = false; }}
-    onmousedown={() => { pressed = true; }}
-    onmouseup={() => { pressed = false; }}
+    class={`
+        relative flex items-center justify-center
+        overflow-visible m-1 p-0
+        ${waiting ? "bg-(--primary-500)" : "bg-(--primary-500)"} text-(--primary-100) border-1 
+        
+        rounded-sm
+        float-left duration-200
+        ${hover && !waiting ? "cursor-pointer" : "cursor-auto"}
+        ${pressed && !waiting ? "inset-shadow-[0_1px_5px_var(--primary-950)]" : waiting ? "inset-shadow-[0_40px_5px_var(--primary-950)]" : ""}
+        ${waiting ? "border-(--primary-500)" : "border-(--primary-600)"}
+    `}
+    onmouseenter={() => {
+        hover = true;
+    }}
+    onmouseleave={() => {
+        hover = false;
+        pressed = false;
+    }}
+    onmousedown={() => {
+        pressed = true;
+    }}
+    onmouseup={() => {
+        pressed = false;
+    }}
     onclick={async () => {
         if (waiting) return;
 
@@ -37,14 +52,30 @@
         }
     }}
 >
-    <div id="border1" class={classList}></div>
-    <div id="border2" class={classList}></div>
-    <div id="spinner" class={classList}>
+    
+    <div
+        id="spinner"
+        class={`
+            absolute flex items-center justify-center row-span-full col-span-full
+            inset-2 duration-500 ease-in-out
+            ${waiting ? "opacity-100" : "opacity-0"}
+        `}
+    >
         <LoadingSpinner color="var(--primary)" />
     </div>
-    <div id="content" class={classList}>
+
+    <div
+        id="content"
+        class={`
+            relative flex items-center justify-center
+            px-3 py-1.5 text-base
+            bg-transparent duration-100
+            opacity-${waiting ? "0" : "100"}
+        `}
+    >
+
         {#if icon != ""}
-            <span class="material-symbols-outlined" style="font-size: calc({fontSize}*1.5);">
+            <span class="material-symbols-outlined mx-1 -ml-1" style="font-size: 22px;">
                 {icon}
             </span>
         {/if}
@@ -52,161 +83,14 @@
     </div>
 </button>
 
-<style>
+<style lang="postcss">
+    @reference "tailwindcss";
+
     .material-symbols-outlined {
         font-variation-settings:
-        'FILL' 1,
-        'wght' 400,
-        'GRAD' 0,
-        'opsz' 24
-    }
-
-    #container {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-
-        overflow: visible;
-        margin: 5px;
-        padding: 0;
-        border: none;
-        background-color: transparent;
-        float: left;
-
-        transition: 0.2s;
-    }
-
-    #container.hover:not(.waiting) {
-        cursor: pointer;
-    }
-
-    #container.pressed,
-    #container.waiting {
-        transform: translateY(2px);
-    }
-
-    #border1 {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-
-        border: solid 1px var(--gray);
-        border-radius: 4px;
-        opacity: 0;
-
-        transition: 0.15s;
-    }
-
-    #border1.hover {
-        top: 2px;
-        bottom: 2px;
-        left: 2px;
-        right: 2px;
-
-        opacity: 1;
-
-        border: solid 1px color-mix(in srgb, var(--gray) 80%, transparent);
-    }
-
-    #border1.pressed {
-        opacity: 0;
-    }
-
-    #border1.waiting {
-        opacity: 0;
-    }
-
-    #border2 {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-
-        background-color: color-mix(in hsl, var(--foreground) 2%, transparent);
-        border: solid 1px var(--gray);
-        border-radius: 4px;
-        box-shadow: 0px 5px 10px black;
-        opacity: 1;
-
-        transition: 0.3s;
-    }
-
-    #border2.hover {
-        top: -2px;
-        bottom: -2px;
-        left: -2px;
-        right: -2px;
-
-        transition: 0.15s;
-        border: solid 1px var(--gray);
-    }
-
-    #border2.pressed {
-        top: 2px;
-        bottom: 2px;
-        left: 2px;
-        right: 2px;
-
-        border: solid 2px var(--primary);
-        box-shadow: 0px 0px 10px black;
-        opacity: 1;
-        transition: 0.15s;
-    }
-
-    #border2.waiting {
-        top: 2px;
-        bottom: 2px;
-        left: 34%;
-        right: 34%;
-
-        transition: 0.3s ease-out;
-        border: solid 2px var(--primary);
-        opacity: 0;
-    }
-
-    #content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        float: left;
-        padding: 2px 8px;
-        margin: 5px 4px 4px 4px;
-
-        background-color: transparent;
-        opacity: 1;
-        transition: 0.1s;
-    }
-
-    #content > span {
-        margin: 0 4px 0 -6px;
-    }
-
-    #content.waiting {
-        opacity: 0;
-    }
-
-    #spinner {
-        position: absolute;
-        top: 0;
-        bottom: 4px;
-        left: 0;
-        right: 0;
-
-        opacity: 0;
-
-        transition: 0.3s ease-in-out;
-
-        scale: 0.5;
-    }
-
-    #spinner.waiting {
-        opacity: 1;
-
-        scale: 1;
+            "FILL" 1,
+            "wght" 400,
+            "GRAD" 0,
+            "opsz" 24;
     }
 </style>
