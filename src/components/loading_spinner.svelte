@@ -1,6 +1,6 @@
 <script lang="ts">
   let {
-    color = 'var(--foreground)'
+    color = 'var(--gray-200)'
   } = $props();
 </script>
 
