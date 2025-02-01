@@ -1,14 +1,14 @@
 <script lang="ts">
   let {
-    color = 'var(--gray-200)'
+    svgCLass = 'stroke-primary-500'
   } = $props();
 </script>
 
 <div class="loader">
   {#each {length: 2} as _, index}
     <svg
+      class="{svgCLass}"
       viewBox="0 0 200 173.20508075688772"
-      stroke="{color}"
       ><path
         fill="transparent"
         d="M0 86.60254037844386L50 0L150 0L200 86.60254037844386L150 173.20508075688772L50 173.20508075688772Z"

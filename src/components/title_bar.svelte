@@ -4,9 +4,9 @@
     let buttonStyle = `
         inline-flex justify-center items-center 
         w-0 h-0 my-auto mx-3
-        border-0 bg-transparent text-(--gray-300) select-none
+        border-0 bg-transparent text-gray-300 select-none
         ease-linear duration-200
-        hover:cursor-pointer hover:text-(--gray-50)
+        hover:cursor-pointer hover:text-gray-50
     `;
 </script>
 
@@ -21,7 +21,7 @@
 
 <div 
     data-tauri-drag-region 
-    class="titlebar h-(--titlebar-height) fixed flex justify-end top-0 left-0 right-1 bg-transparent select-none z-100"
+    class="titlebar h-7 fixed flex justify-end top-0 left-0 right-1 bg-transparent select-none z-100"
 >
     <button
         class="titlebar-button {buttonStyle}"

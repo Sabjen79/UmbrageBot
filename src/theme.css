@@ -5,10 +5,38 @@
     src: url(assets/fonts/SourceSans3-VariableFont_wght.ttf);
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @font-face {
     font-family: "SourceSans";
     font-style: italic;
     src: local("assets/fonts/SourceSans3-Italic-VariableFont_wght.ttf");
+}
+
+@theme {
+    --color-gray-50: #dee3ed;
+    --color-gray-100: #cfd5e3;
+    --color-gray-200: #b4bbd0;
+    --color-gray-300: #969fba;
+    --color-gray-400: #7b83a3;
+    --color-gray-500: #656b8b;
+    --color-gray-600: #51556b;
+    --color-gray-700: #3d3e4d;
+    --color-gray-800: #272730;
+    --color-gray-900: #131316;
+    --color-gray-950: #070708;
+
+    --color-primary-50: light-dark(#e6f0ff, #e8f0fc);
+    --color-primary-100: light-dark(#cfdefc, #d2dff9);
+    --color-primary-200: light-dark(#a2b9f6, #a8bbf0);
+    --color-primary-300: light-dark(#7990ec, #7f93e6);
+    --color-primary-400: light-dark(#5265e0, #5769db);
+    --color-primary-500: light-dark(#333dcd, #333dcd);
+    --color-primary-600: light-dark(#1f32ad, #2436a8);
+    --color-primary-700: light-dark(#132a86, #192d80);
+    --color-primary-800: light-dark(#09205d, #0f2257);
+    --color-primary-900: light-dark(#031230, #06132d);
+    --color-primary-950: light-dark(#000a19, #030b17);
 }
 
 * {
@@ -16,53 +44,22 @@
 }
 
 :root {
-    --titlebar-height: 30px;
-
-    --primary-50: light-dark(#e6f0ff, #e8f0fc);
-    --primary-100: light-dark(#cfdefc, #d2dff9);
-    --primary-200: light-dark(#a2b9f6, #a8bbf0);
-    --primary-300: light-dark(#7990ec, #7f93e6);
-    --primary-400: light-dark(#5265e0, #5769db);
-    --primary-500: light-dark(#333dcd, #333dcd);
-    --primary-600: light-dark(#1f32ad, #2436a8);
-    --primary-700: light-dark(#132a86, #192d80);
-    --primary-800: light-dark(#09205d, #0f2257);
-    --primary-900: light-dark(#031230, #06132d);
-    --primary-950: light-dark(#000a19, #030b17);
-    
-    --gray-50: #eff1f6;
-    --gray-100: #dfe3ec;
-    --gray-200: #bdc5d6;
-    --gray-300: #a0abc0;
-    --gray-400: #818da7;
-    --gray-500: #67748e;
-    --gray-600: #535c6f;
-    --gray-700: #3c424e;
-    --gray-800: #272a30;
-    --gray-900: #0f1012;
-    --gray-950: #070708;
-
-    /* TODO: Implement Light Mode Properly */
-    --foreground: light-dark(#0F0F13, #EAEAEE);
-    
-    --primary: light-dark(#333DCC, #333DCC);
-    --secondary: light-dark(#95A4C5, #384769);
-    --accent: light-dark(#2E35A3, #5C63D0);
-    --error: light-dark(#de1b1b, #e70000);
-
-    --gray: color-mix(in hsl, var(--background), var(--foreground) 60%);
-    --darkgray: color-mix(in hsl, var(--background), var(--foreground) 30%);
-
-    color-scheme: dark;
-
-    margin: 0;
-    padding: 0;
-
-    --background: light-dark(var(--gray-50), var(--gray-900));
-    background-color: light-dark(var(--gray-50), var(--gray-950));
+    @apply
+        m-0 p-0
+        bg-gray-50 dark:bg-gray-950
+        text-gray-950 dark:text-gray-50
 }
 
 body {
-    margin: 0;
-    padding: 0;
+    @apply m-0 p-0;
+}
+
+p {
+    @apply break-words;
+}
+
+.shadow-container {
+    @apply 
+        inset-shadow-[0_1px_1px_rgba(255,255,255,.05)]
+        shadow-[0_2px_5px_rgba(0,0,0,0.5)];
 }

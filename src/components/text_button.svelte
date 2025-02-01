@@ -1,6 +1,6 @@
 <script lang="ts">
     let {
-        label = "Text Button",
+        text = "Text Button",
         onclick
     } = $props();
 
@@ -9,37 +9,27 @@
 </script>
 
 <button 
-    id="container" 
+    class={`
+        relative inline-flex p-0
+        bg-transparent border-0
+        font-semibold text-primary-400
+        hover:cursor-pointer
+    `}
     onmouseenter={() => { hover = true; }}
     onmouseleave={() => { hover = false; pressed = false; }}
     onmousedown={() => { pressed = true; }}
     onmouseup={() => { pressed = false; }}
     onclick={onclick}
 >
-    <div id="content">{label}</div>
+    <div id="content">{text}</div>
     <div 
         id="border"
         class={{hover, pressed}}
-    >{label}</div>
+    >{text}</div>
 </button>
 
 <style>
-    #container {
-        position: relative;
-        display: inline-flex;
-
-        padding: 0;
-        background-color: transparent;
-        border: 0;
-        font-size: inherit;
-        font-weight: 500;
-        color: var(--accent);
-    }
-
-    #container:hover {
-        cursor: pointer;
-    }
-
+    /* Tailwind doesn't have clip-path :( */
     #border {
         position: absolute;
         top: 0;
@@ -47,8 +37,8 @@
         left: 0;
         right: 0;
 
-        color: var(--background);
-        background-color: var(--accent);
+        color: var(--color-gray-900);
+        background-color: var(--color-primary-400);
         user-select: none;
 
         clip-path: polygon(50% 90%, 50% 90%, 50% 85%, 50% 85%);
@@ -62,7 +52,7 @@
 
     #border.pressed {
         clip-path: polygon(0% 90%, 100% 90%, 100% 10%, 0% 10%);
-        background-color: var(--primary);
+        background-color: var(--color-primary-400);
         transition: 0.05s ease-in-out;
     }
 </style>

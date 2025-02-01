@@ -1,10 +1,5 @@
 <script lang="ts">
-    let { 
-        children,
-        width = "auto",
-        height = "auto",
-        title = ""
-    } = $props();
+    let { children, title = "" } = $props();
 
     export function open() {
         opened = true;
@@ -17,7 +12,7 @@
     }
 
     export function close() {
-        if(blocked) return;
+        if (blocked) return;
         visible = false;
 
         new Promise((resolve) => {
@@ -43,125 +38,60 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 {#if opened}
-    <div id="container">
-        <div id="background" class={{visible}} onclick={close}></div>
-        <div id="dialog" 
-            class={{visible}}
-            style="width: {width}; height: {height}"
+    <div
+        id="container"
+        class={`
+            fixed inset-0 w-[100vw] h-[100vh]
+            flex justify-center items-center
+        `}
+    >
+        <div 
+            id="background"
+            class={`
+                absolute w-full h-full bg-[#0000008d]
+                duration-250 ease-out 
+                ${visible ? "opacity-100" : "opacity-0"}
+            `}
+            onclick={close}
+        ></div>
+
+        <div 
+            id="dialog" 
+            class={`
+                absolute flex flex-col justify-center
+                m-0 p-0 bg-gray-900 shadow-container
+                border-1 border-gray-950 rounded-sm
+                duration-250 ease-out w-auto h-auto
+                ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"}
+            `}
+        >
+            <button 
+                class={`
+                    absolute top-3 right-3
+                    bg-transparent border-0
+                    duration-200 ease-out
+                    opacity-60 hover:opacity-100 
+                    hover:cursor-pointer
+                `}
+                onclick={close}
             >
-            <button class="titlebar-button" id="titlebar-close" onclick={close}>
-                <span class="material-symbols-outlined"  style="font-size: 1.7em;">
+                <span class="material-symbols-outlined text-2xl">
                     close
                 </span>
             </button>
-            <div id="title">
+
+            <div 
+                class={`
+                    flex items-center w-full h-6
+                    mx-4 my-3 text-xl font-semibold
+                `}
+            >
                 <p>{title}</p>
             </div>
-            <div id="content">
+
+            <div class="px-3 py-3 -mt-3 overflow-hidden">
                 {@render children()}
             </div>
         </div>
     </div>
 {/if}
-
-
-<style>
-    :root {
-        --titlecolor: color-mix(in srgb, var(--secondary) 50%, var(--background));
-    }
-
-    #container {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-
-        width: 100vw;
-        height: 100vh;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    #background {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background-color: #0000008d;
-
-        transition: 0.25s ease-out;
-        opacity: 0;
-    }
-
-    #background.visible {
-        opacity: 1;
-    }
-
-    #dialog {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        position: absolute;
-
-        margin: 0;
-        padding: 0;
-
-        background-color: var(--background);
-        border: 1px solid var(--titlecolor);
-        border-radius: 5px;
-
-        transition: 0.25s ease-out;
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    #dialog.visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    #dialog > button {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-
-        background-color: transparent;
-        border: none;
-
-        transition: 0.2s ease-out;
-        opacity: 0.6;
-    }
-
-    #dialog > button:hover {
-        cursor: pointer;
-        opacity: 1;
-    }
-
-    #title {
-        display: flex;
-        align-items: center;
-
-        width: 100%;
-        height: 30px;
-
-        margin: 10px 15px;
-
-        background-color: transparent;
-        border-radius: 2px 2px 0 0;
-    }
-
-    #title > p {
-        font-size: 1.5em;
-        font-weight: 500;
-    }
-
-    #content {
-        display: flex;
-        justify-content: center;
-
-        padding: 10px 15px;
-        
-    }
-</style>

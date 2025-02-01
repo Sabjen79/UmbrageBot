@@ -4,6 +4,7 @@
     let {
         text,
         icon = "",
+        disabled = $bindable(false),
         onclick = async () => {
             await new Promise((resolve) => setTimeout(resolve, 3000));
         },
@@ -18,14 +19,14 @@
     id="container"
     class={`
         relative flex items-center justify-center
-        overflow-visible m-1 p-0
-        ${waiting ? "bg-(--primary-500)" : "bg-(--primary-500)"} text-(--primary-100) border-1 
+        overflow-visible m-1 p-0 scheme-only-light
+        ${disabled ? "bg-gray-100" : hover && !waiting ? "bg-primary-600" : "bg-primary-100 dark:bg-primary-500"} text-primary-100 border-1 
         
         rounded-sm
         float-left duration-200
         ${hover && !waiting ? "cursor-pointer" : "cursor-auto"}
-        ${pressed && !waiting ? "inset-shadow-[0_1px_5px_var(--primary-950)]" : waiting ? "inset-shadow-[0_40px_5px_var(--primary-950)]" : ""}
-        ${waiting ? "border-(--primary-500)" : "border-(--primary-600)"}
+        ${pressed && !waiting ? "inset-shadow-[0_1px_5px_var(--color-primary-950)]" : waiting ? "inset-shadow-[0_40px_5px_var(--color-primary-950)]" : ""}
+        ${waiting ? "border-primary-500" : "border-primary-600"}
     `}
     onmouseenter={() => {
         hover = true;
@@ -61,7 +62,7 @@
             ${waiting ? "opacity-100" : "opacity-0"}
         `}
     >
-        <LoadingSpinner color="var(--primary)" />
+        <LoadingSpinner />
     </div>
 
     <div

@@ -2,6 +2,8 @@
     import TitleBar from "../components/title_bar.svelte";
 
     let { children } = $props();
+
+    document.documentElement.classList.add("dark");
 </script>
 
 <TitleBar />

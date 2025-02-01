@@ -43,16 +43,27 @@
 <div
     id="container"
     aria-label="input"
-    class={{hover, focus, waiting, error}}
+    class={`
+        relative inline-flex items-center
+        bg-gray-950 border-none rounded-md
+        w-full h-9.5 p-2 m-0
+        ring-1 
+        duration-200 ease-out
+        ${error ? "ring-red-700" 
+        : focus ? "ring-primary-500" 
+        : hover ? "ring-gray-400" 
+        : "ring-gray-700"}
+    `}
     onmouseenter={() => { hover = true }}
     onmouseleave={() => { hover = false }}
 >
-    <div id="border"></div>
     <input type="text"
         bind:value
         placeholder={placeholder}
         onfocusin={() => { focus = true }}
         onfocusout={() => { focus = false; }}
+        onmouseenter={() => { hover = true }}
+        onmouseleave={() => { hover = false }}
         onkeypress={(event) => {
             if(event.key == 'Enter') document.querySelector("input")?.blur();
         }}
@@ -64,55 +75,13 @@
 </div>
 
 <style>
-    #container {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        background-color: color-mix(in hsl, var(--foreground) 2%, transparent);
-        border: none;
-
-        width: 100%;
-        height: 100%;
-
-        padding: 7px 7px;
-        margin: 0;
-    }
-
-    #border {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-
-        border-radius: 5px;
-        pointer-events: none;
-
-        border: solid 1px var(--gray);
-        transition: 0.2s ease-in-out;
-        outline: solid 1px transparent;
-    }
-    
-    .hover:not(.focus, .error) > #border {
-        border: solid 1px var(--foreground);
-    }
-
-    .focus > #border {
-        border: solid 1px var(--primary);
-        outline: solid 1px var(--primary);
-    }
-
-    .error > #border {
-        border: solid 1px var(--error);
-        outline: solid 1px var(--error);
-    }
-
     input {
         background-color: transparent;
         border: none;
         outline: none;
 
         width: 100%;
+        height: 24px;
     }
 
     #spinner {
