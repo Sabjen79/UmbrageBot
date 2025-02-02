@@ -20,13 +20,13 @@
     class={`
         relative flex items-center justify-center
         overflow-visible m-1 p-0 scheme-only-light
-        ${disabled ? "bg-gray-100" : hover && !waiting ? "bg-primary-600" : "bg-primary-100 dark:bg-primary-500"} text-primary-100 border-1 
+        ${disabled ? "bg-gray-800" : hover && !waiting ? "bg-primary-600" : "bg-primary-100 dark:bg-primary-500"} text-primary-100 border-1 
         
         rounded-sm
         float-left duration-200
-        ${hover && !waiting ? "cursor-pointer" : "cursor-auto"}
+        ${hover && !waiting && !disabled ? "cursor-pointer" : "cursor-auto"}
         ${pressed && !waiting ? "inset-shadow-[0_1px_5px_var(--color-primary-950)]" : waiting ? "inset-shadow-[0_40px_5px_var(--color-primary-950)]" : ""}
-        ${waiting ? "border-primary-500" : "border-primary-600"}
+        ${disabled ? "border-gray-900" : waiting ? "border-primary-500" : "border-primary-600"}
     `}
     onmouseenter={() => {
         hover = true;
@@ -36,13 +36,17 @@
         pressed = false;
     }}
     onmousedown={() => {
+        if(disabled) return;
+
         pressed = true;
     }}
     onmouseup={() => {
+        if(disabled) return;
+
         pressed = false;
     }}
     onclick={async () => {
-        if (waiting) return;
+        if (waiting || disabled) return;
 
         if (onclick instanceof (async () => {}).constructor) {
             waiting = true;

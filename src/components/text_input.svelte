@@ -5,6 +5,7 @@
 
     let {
         value = $bindable(""),
+        validated = $bindable(false),
         placeholder = "Input Text",
         validationType = "",
     } = $props();
@@ -12,10 +13,12 @@
     let hover = $state(false);
     let focus = $state(false);
     let waiting = $state(false);
-    let error = $state(false);
+    let firstValidation = $state(true);
 
     let validationId = 0;
     async function validationFunc() {
+        // TODO: Validation persists between responses
+        firstValidation = false;
         waiting = true;
 
         validationId = (validationId + 1) % 127;
@@ -25,16 +28,20 @@
             validationType: validationType,
             validationId: validationId
         }).then((value) => {
-            let v: number = value as number;
-            if(Math.abs(v) == validationId) {
+            if(value == validationId) {
                 waiting = false;
-                error = (v < 0);
+                validated = true;
+            }
+        }).catch((value) => {
+            if(value == validationId) {
+                waiting = false;
+                validated = false;
             }
         });
     }
 
     if(value == "" && validationType != "") {
-        error = true;
+        validated = false;
     }
 </script>
 
@@ -49,7 +56,7 @@
         w-full h-9.5 p-2 m-0
         ring-1 
         duration-200 ease-out
-        ${error ? "ring-red-700" 
+        ${!firstValidation && !validated ? "ring-red-700" 
         : focus ? "ring-primary-500" 
         : hover ? "ring-gray-400" 
         : "ring-gray-700"}

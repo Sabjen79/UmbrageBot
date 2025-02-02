@@ -3,18 +3,18 @@ use tauri::Manager;
 mod config;
 mod database;
 mod logging;
+mod input_validator;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_window_state::Builder::new().build())
-        .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            validate_input,
+            input_validator::validate_input,
             database::bot_accounts::get_all_accounts,
             database::bot_accounts::insert_account,
             database::bot_accounts::update_account_token,
@@ -36,18 +36,4 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-// TODO: Move this elsewhere
-#[tauri::command]
-async fn validate_input(message: &str, validation_type: &str, validation_id: i8) -> Result<i8, String> {
-    if validation_type == "" {
-        return Ok(validation_id);
-    }
-
-    if message == "ok" {
-        return Ok(validation_id);
-    }
-
-    Ok(-validation_id)
 }

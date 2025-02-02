@@ -13,7 +13,11 @@
     });
   }
 
-  let botAccounts = null;
+  let tokenValidated = $state(false);
+
+  // svelte-ignore non_reactive_update
+  let botAccounts;
+  // svelte-ignore non_reactive_update
   let addDialog: Dialog;
 </script>
 
@@ -30,7 +34,7 @@
     </div>
   {:then _}
     <div class="absolute mx-3 my-3">
-      <Button text="New Bot" icon="add" onclick={() => {
+      <Button  text="New Bot" icon="add" onclick={() => {
         addDialog.open();
       }} />
       <Dialog bind:this={addDialog} title="Add new bot">
@@ -41,10 +45,10 @@
             }}/> and create a new application. In the 'Bot' section, take the generated token and paste it down below to register your bot.
           </p>
 
-          <TextInput placeholder="Token"/>
+          <TextInput bind:validated={tokenValidated} placeholder="Token" validationType="token"/>
 
           <div class="w-full flex justify-end mt-3">
-            <Button text="Add Bot" />
+            <Button text="Add Bot" disabled={!tokenValidated}/>
           </div>
         </div>
       </Dialog>

@@ -10,6 +10,7 @@ static LOG_FILE: OnceLock<String> = OnceLock::new();
 
 pub fn info(message: &str) {
     let _ = write(message, "INFO");
+    println!("{}", message);
 }
 
 // pub fn warn(message: &str) {
@@ -65,7 +66,7 @@ fn write(message: &str, level: &str) -> Result<(), Box<dyn Error>> {
     }
 
     let log = format!(
-        "[{}] [{}] {}\n",
+        "[{}][{}] {}\n",
         chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.6f"),
         level,
         message

@@ -15,7 +15,6 @@
     "shell:allow-open",
     "opener:default",
     "dialog:default",
-    "fs:default",
-    "log:default"
+    "fs:default"
   ]
 }
