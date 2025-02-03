@@ -17,8 +17,11 @@ pub fn info(message: &str) {
 //     let _ = write(message, "WARN");
 // }
 
+// TODO: Implement error alerts
 // pub fn severe(message: &str) {
 //     let _ = write(message, "SEVERE");
+
+//     APP.get().unwrap().emit("severe_log", message).unwrap();
 // }
 
 pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {

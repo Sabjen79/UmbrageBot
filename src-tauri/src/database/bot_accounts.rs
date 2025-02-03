@@ -2,11 +2,12 @@ use super::get_connection;
 use serenity::prelude::*;
 
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct BotAccount {
-    id: String,
-    token: String,
-    name: String,
-    avatar_url: String,
+    pub id: String,
+    pub token: String,
+    pub name: String,
+    pub avatar_url: String,
 }
 
 #[tauri::command]
@@ -105,7 +106,7 @@ pub fn delete_account(id: &str) -> Result<(), String> {
 //     ).unwrap();
 // }
 
-async fn get_bot_info(token: &str) -> Result<BotAccount, String> {
+pub async fn get_bot_info(token: &str) -> Result<BotAccount, String> {
     let client = Client::builder(token, GatewayIntents::all())
         .status(serenity::all::OnlineStatus::Invisible)
         .await

@@ -1,24 +1,32 @@
 <script lang="ts">
-  import { open } from "@tauri-apps/plugin-shell";
+  
   import Button from "../../components/button.svelte";
   import Dialog from "../../components/dialog.svelte";
   import { invoke } from "@tauri-apps/api/core";
   import LoadingSpinner from "../../components/loading_spinner.svelte";
   import TextButton from "../../components/text_button.svelte";
   import TextInput from "../../components/text_input.svelte";
+  import AddBotDialog from "./add_bot_dialog.svelte";
+
+  type BotAccount = {
+    id: string,
+    token: string,
+    name: string,
+    avatarUrl: string
+  };
 
   async function loadBots() {
     await invoke('get_all_accounts').then((result) => {
-      botAccounts = result;
+      botAccounts = result as BotAccount[];
     });
   }
 
-  let tokenValidated = $state(false);
+  let botAccounts = $state([] as BotAccount[]);
 
   // svelte-ignore non_reactive_update
-  let botAccounts;
-  // svelte-ignore non_reactive_update
-  let addDialog: Dialog;
+  let addBotDialog: AddBotDialog;
+
+  
 </script>
 
 <div class={`maindiv shadow-container
@@ -35,23 +43,9 @@
   {:then _}
     <div class="absolute mx-3 my-3">
       <Button  text="New Bot" icon="add" onclick={() => {
-        addDialog.open();
+        addBotDialog.open();
       }} />
-      <Dialog bind:this={addDialog} title="Add new bot">
-        <div class="w-90 flex flex-col justify-center">
-          <p class="text-center mb-3 mt-0">
-            Go to <TextButton text="Discord Developer Portal" onclick={() => {
-              open("https://discord.com/developers/applications");
-            }}/> and create a new application. In the 'Bot' section, take the generated token and paste it down below to register your bot.
-          </p>
-
-          <TextInput bind:validated={tokenValidated} placeholder="Token" validationType="token"/>
-
-          <div class="w-full flex justify-end mt-3">
-            <Button text="Add Bot" disabled={!tokenValidated}/>
-          </div>
-        </div>
-      </Dialog>
+      <AddBotDialog bind:this={addBotDialog} {loadBots}/>
     </div>
 
     {#if botAccounts.length == 0}

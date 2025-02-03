@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { blur } from "svelte/transition";
-    import LoadingSpinner from "./loading_spinner.svelte";
     import { invoke } from "@tauri-apps/api/core";
 
     let {
@@ -13,14 +11,21 @@
     let hover = $state(false);
     let focus = $state(false);
     let waiting = $state(false);
-    let firstValidation = $state(true);
 
+    let firstValidation = $state(true);
     let validationId = 0;
+    let lastError = $state("");
+    let errorVisible = $state(false);
+
+    type InputValidationError = {
+        validationId: number;
+        message: string;
+    };
+
     async function validationFunc() {
-        // TODO: Validation persists between responses
         firstValidation = false;
         waiting = true;
-
+        validated = false;
         validationId = (validationId + 1) % 127;
 
         await invoke('validate_input', {
@@ -32,10 +37,11 @@
                 waiting = false;
                 validated = true;
             }
-        }).catch((value) => {
-            if(value == validationId) {
+        }).catch((error: InputValidationError) => {
+            if(error.validationId == validationId) {
                 waiting = false;
                 validated = false;
+                lastError = error.message;
             }
         });
     }
@@ -47,63 +53,84 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- Input is the main focusable object, Accesibility is useless for this div -->
-<div
-    id="container"
-    aria-label="input"
-    class={`
-        relative inline-flex items-center
-        bg-gray-950 border-none rounded-md
-        w-full h-9.5 p-2 m-0
-        ring-1 
-        duration-200 ease-out
-        ${!firstValidation && !validated ? "ring-red-700" 
-        : focus ? "ring-primary-500" 
-        : hover ? "ring-gray-400" 
-        : "ring-gray-700"}
-    `}
-    onmouseenter={() => { hover = true }}
-    onmouseleave={() => { hover = false }}
->
-    <input type="text"
-        bind:value
-        placeholder={placeholder}
-        onfocusin={() => { focus = true }}
-        onfocusout={() => { focus = false; }}
+<div class="relative z-1">
+    <div
+        id="container"
+        aria-label="input"
+        class={`
+            relative inline-flex items-center
+            bg-gray-950 border-none rounded-md ring-1
+            w-full h-9.5 p-2 m-0 
+            duration-200 ease-out
+            ${!firstValidation && !validated ? "ring-red-800"
+            : waiting ? "ring-gray-400"
+            : focus ? "ring-primary-500" 
+            : hover ? "ring-gray-400" 
+            : "ring-gray-700"}
+        `}
         onmouseenter={() => { hover = true }}
-        onmouseleave={() => { hover = false }}
-        onkeypress={(event) => {
-            if(event.key == 'Enter') document.querySelector("input")?.blur();
-        }}
-        oninput={validationFunc}
-    >
-    <div id="spinner">
-        <LoadingSpinner />
+        onmouseleave={() => { hover = false }}>
+
+        <input type="text"
+            class={`
+                bg-transparent border-0 outline-0
+                flex-1 h-6
+            `}
+            bind:value
+            placeholder={placeholder}
+            onfocusin={() => { focus = true }}
+            onfocusout={() => { focus = false; }}
+            onmouseenter={() => { hover = true }}
+            onmouseleave={() => { hover = false }}
+            onkeypress={(event) => {
+                if(event.key == 'Enter') document.querySelector("input")?.blur();
+            }}
+            oninput={validationFunc} 
+        />
+
+        <div
+            class={`
+                relative h-full w-7.5 text-red-800
+                justify-end items-center pointer-events-none
+                duration-200 ease-in-out overflow-visible
+                ${!firstValidation && !validated ? "opacity-100 flex" : "opacity-0 hidden"}
+            `}>
+
+            <button
+                onmouseenter={() => { errorVisible = true }}
+                onmouseleave={() => { errorVisible = false }}
+                class={`
+                    material-symbols-outlined 
+                    pb-0.5 pointer-events-auto
+                    bg-gray-950
+                `}
+            >
+                warning
+            </button>
+        </div>
+        <div class={`
+                absolute bg-red-800 text-gray-950
+                right-2 top-0 -z-1
+                px-2 py-0.5 text-base duration-250 ease-out
+                rounded-t-md pointer-events-none overflow-hidden
+                ${errorVisible ? "-translate-y-full" : "translate-y-0"}
+            `}>
+
+            {lastError}
+        </div>
+
     </div>
 </div>
 
+
+
+
 <style>
-    input {
-        background-color: transparent;
-        border: none;
-        outline: none;
-
-        width: 100%;
-        height: 24px;
-    }
-
-    #spinner {
-        position: absolute;
-        width: 24px;
-        height: 24px;
-        right: 8px;
-
-        pointer-events: none;
-        
-        opacity: 0;
-        transition: 0.15s ease-in-out;
-    }
-
-    .waiting > #spinner {
-        opacity: 1;
+    .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
     }
 </style>

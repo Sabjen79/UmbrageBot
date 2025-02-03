@@ -1,9 +1,13 @@
-use tauri::Manager;
+use std::sync::OnceLock;
+
+use tauri::{AppHandle, Manager};
 
 mod config;
 mod database;
 mod logging;
 mod input_validator;
+
+pub static APP: OnceLock<AppHandle> = OnceLock::new();
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -21,6 +25,8 @@ pub fn run() {
             database::bot_accounts::delete_account
         ])
         .setup(|app| {
+            APP.get_or_init(|| app.handle().to_owned());
+            
             let config_path = format!(
                 "{}\\UmbrageBot",
                 app.path().config_dir().unwrap().to_str().unwrap()

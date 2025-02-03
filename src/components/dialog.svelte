@@ -61,7 +61,7 @@
                 absolute flex flex-col justify-center
                 m-0 p-0 bg-gray-900 shadow-container
                 border-1 border-gray-950 rounded-sm
-                duration-250 ease-out w-auto h-auto
+                duration-250 ease-out w-auto h-auto 
                 ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"}
             `}
         >
@@ -75,9 +75,9 @@
                 `}
                 onclick={close}
             >
-                <span class="material-symbols-outlined text-2xl">
+                <div class="material-symbols-outlined text-2xl flex justify-center items-center">
                     close
-                </span>
+                </div>
             </button>
 
             <div 
@@ -89,7 +89,7 @@
                 <p>{title}</p>
             </div>
 
-            <div class="px-3 py-3 -mt-3 overflow-hidden">
+            <div class="px-3 py-3 -mt-3 overflow-visible">
                 {@render children()}
             </div>
         </div>

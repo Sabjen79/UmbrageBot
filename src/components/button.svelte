@@ -20,10 +20,8 @@
     class={`
         relative flex items-center justify-center
         overflow-visible m-1 p-0 scheme-only-light
-        ${disabled ? "bg-gray-800" : hover && !waiting ? "bg-primary-600" : "bg-primary-100 dark:bg-primary-500"} text-primary-100 border-1 
-        
-        rounded-sm
-        float-left duration-200
+        ${disabled ? "bg-gray-800" : hover && !waiting ? "bg-primary-600" : "bg-primary-100 dark:bg-primary-500"} 
+        text-primary-100 border-1 rounded-sm float-left duration-200
         ${hover && !waiting && !disabled ? "cursor-pointer" : "cursor-auto"}
         ${pressed && !waiting ? "inset-shadow-[0_1px_5px_var(--color-primary-950)]" : waiting ? "inset-shadow-[0_40px_5px_var(--color-primary-950)]" : ""}
         ${disabled ? "border-gray-900" : waiting ? "border-primary-500" : "border-primary-600"}
