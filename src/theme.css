@@ -1,17 +1,22 @@
 @import "tailwindcss";
 
 @font-face {
-    font-family: "SourceSans";
-    src: url(assets/fonts/SourceSans3-VariableFont_wght.ttf);
+    font-family: SourceSans;
+    src: url("assets/fonts/SourceSans3-VariableFont_wght.ttf");
+}
+
+@font-face {
+    font-family: SourceSans;
+    font-style: italic;
+    src: url("assets/fonts/SourceSans3-Italic-VariableFont_wght.ttf");
+}
+
+@font-face {
+    font-family: UnsteadyOversteer;
+    src: url("assets/fonts/Unsteady-Oversteer.otf") format("opentype");
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
-
-@font-face {
-    font-family: "SourceSans";
-    font-style: italic;
-    src: local("assets/fonts/SourceSans3-Italic-VariableFont_wght.ttf");
-}
 
 @theme {
     --color-gray-50: #dee3ed;
@@ -22,7 +27,7 @@
     --color-gray-500: #656b8b;
     --color-gray-600: #51556b;
     --color-gray-700: #3d3e4d;
-    --color-gray-800: #272730;
+    --color-gray-800: #22222b;
     --color-gray-900: #131316;
     --color-gray-950: #070708;
 
@@ -37,15 +42,18 @@
     --color-primary-800: light-dark(#09205d, #0f2257);
     --color-primary-900: light-dark(#031230, #06132d);
     --color-primary-950: light-dark(#000a19, #030b17);
+
+    --font-sourcesans: SourceSans;
+    --font-oversteer: UnsteadyOversteer;
 }
 
 * {
-    font-family: "SourceSans";
+    @apply font-sourcesans
 }
 
 :root {
     @apply
-        m-0 p-0
+        m-0 p-0 overflow-hidden
         bg-gray-50 dark:bg-gray-950
         text-gray-950 dark:text-gray-50
 }
@@ -58,8 +66,30 @@ p {
     @apply break-words;
 }
 
+::-webkit-scrollbar {
+    @apply w-1
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-transparent
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-white/10
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20
+}
+
 .shadow-container {
     @apply 
         inset-shadow-[0_1px_1px_rgba(255,255,255,.05)]
         shadow-[0_2px_5px_rgba(0,0,0,0.5)];
+}
+
+.shadow-container-xl {
+    @apply 
+        inset-shadow-[0_2px_2px_rgba(255,255,255,.05)]
+        shadow-[0_5px_5px_rgba(0,0,0,0.5)];
 }

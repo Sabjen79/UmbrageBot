@@ -42,7 +42,7 @@
         id="container"
         class={`
             fixed inset-0 w-[100vw] h-[100vh]
-            flex justify-center items-center
+            flex justify-center items-center z-100
         `}
     >
         <div 

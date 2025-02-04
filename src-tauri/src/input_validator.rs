@@ -42,7 +42,7 @@ async fn validate_token(token: &str) -> Result<(), Box<dyn std::error::Error>> {
         .http
         .get_current_user()
         .await
-        .map_err(|_| "The provided token does not correspond to a bot")?;
+        .map_err(|_| "The provided token was invalid")?;
 
     let bots = crate::database::bot_accounts::get_all_accounts()?;
     for bot in bots {
