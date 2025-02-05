@@ -12,8 +12,10 @@
     {@html icon}
 </div>
 
-<TitleBar />
+
 <main class="w-[100vw] h-[100vh] overflow-hidden flex items-center justify-center">
     {@render children()}
 </main>
+
 <ErrorPopup />
+<TitleBar />

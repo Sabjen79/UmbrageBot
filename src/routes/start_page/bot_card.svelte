@@ -1,4 +1,5 @@
 <script lang="ts">
+    import IconButton from "../../components/icon_button.svelte";
     import { type BotAccount } from "./bot_account";
 
     let {
@@ -26,8 +27,14 @@
         : "bg-gray-800 shadow-container translate-y-0"}
     `}
 >   
+    <div
+        class={`
+            absolute top-1.5 right-1.5
+        `}
+    >
+        <IconButton icon="more_vert"/>
+    </div>
 
-    
     <div class={`relative
         rounded-full w-[80%] mt-[10%] inset-shadow-[0_0_10px_rgba(0,0,0,0.5)]
         overflow-hidden

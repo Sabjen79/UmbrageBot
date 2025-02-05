@@ -62,7 +62,7 @@
             bg-gray-950 border-none rounded-md ring-1
             w-full h-9.5 p-2 m-0 
             duration-200 ease-out
-            ${!firstValidation && !validated ? "ring-red-800"
+            ${!firstValidation && !validated ? "ring-red-700"
             : waiting ? "ring-gray-400"
             : focus ? "ring-primary-500" 
             : hover ? "ring-gray-400" 
@@ -90,7 +90,7 @@
 
         <div
             class={`
-                relative h-full w-7.5 text-red-800
+                relative h-full w-7.5 text-red-700
                 justify-end items-center pointer-events-none
                 duration-200 ease-in-out overflow-visible
                 ${!firstValidation && !validated ? "opacity-100 flex" : "opacity-0 hidden"}
@@ -100,7 +100,7 @@
                 onmouseenter={() => { errorVisible = true }}
                 onmouseleave={() => { errorVisible = false }}
                 class={`
-                    material-symbols-outlined 
+                    font-icons text-2xl [font-variation-settings:'FILL'_1,'wght'_400,'GRAD'_0,'opsz'_24]
                     pb-0.5 pointer-events-auto
                     bg-gray-950
                 `}
@@ -109,7 +109,7 @@
             </button>
         </div>
         <div class={`
-                absolute bg-red-800 text-gray-950
+                absolute bg-red-700 text-gray-950
                 right-2 top-0 -z-1
                 px-2 py-0.5 text-base duration-250 ease-out
                 rounded-t-md pointer-events-none overflow-hidden
@@ -121,16 +121,3 @@
 
     </div>
 </div>
-
-
-
-
-<style>
-    .material-symbols-outlined {
-        font-variation-settings:
-        'FILL' 1,
-        'wght' 400,
-        'GRAD' 0,
-        'opsz' 24;
-    }
-</style>

@@ -75,7 +75,7 @@
                 `}
                 onclick={close}
             >
-                <div class="material-symbols-outlined text-2xl flex justify-center items-center">
+                <div class="font-icons text-2xl flex justify-center items-center">
                     close
                 </div>
             </button>

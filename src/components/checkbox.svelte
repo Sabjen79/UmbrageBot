@@ -35,6 +35,7 @@
 </div>
 
 <style>
+    /* TODO: CHANGE THIS CRAP */
     .material-symbols-outlined {
         font-variation-settings:
         'FILL' 0,

@@ -16,6 +16,11 @@
     src: url("assets/fonts/Unsteady-Oversteer.otf") format("opentype");
 }
 
+@font-face {
+    font-family: Icons;
+    src: url("assets/fonts/MaterialSymbolsOutlined.woff2") format("woff2");
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -45,21 +50,22 @@
 
     --font-sourcesans: SourceSans;
     --font-oversteer: UnsteadyOversteer;
+    --font-icons: Icons;
 }
 
-* {
-    @apply font-sourcesans
+.font-icons {
+    @apply leading-none tracking-normal whitespace-nowrap inline-block [font-variation-settings:"FILL"_0,"wght"_300,"GRAD"_0,"opsz"_24];
 }
 
 :root {
     @apply
-        m-0 p-0 overflow-hidden
+        font-sourcesans m-0 p-0 overflow-hidden
         bg-gray-50 dark:bg-gray-950
         text-gray-950 dark:text-gray-50
 }
 
 body {
-    @apply m-0 p-0;
+    @apply m-0 p-0 font-sourcesans;
 }
 
 p {
