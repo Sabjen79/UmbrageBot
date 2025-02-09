@@ -5,9 +5,12 @@
     import TextButton from "../../components/text_button.svelte";
     import TextInput from "../../components/text_input.svelte";
     import { open as openExternal } from "@tauri-apps/plugin-shell";
+    import { refreshBots, type BotAccount } from "./bot_accounts";
 
-    let {
-        loadBots = async () => {}
+    let { 
+        botAccount = null // Used for update mode
+    }: {
+        botAccount?: BotAccount | null
     } = $props();
 
     let dialog: Dialog;
@@ -20,23 +23,39 @@
     }
 </script>
 
-<Dialog bind:this={dialog} title="Add new bot">
+<Dialog bind:this={dialog} title={botAccount == null ? "Add New Bot" : "Update token"}>
     <div class="w-90 flex flex-col justify-center">
         <p class="text-center mb-3 mt-0">
-            Go to <TextButton text="Discord Developer Portal" onclick={() => {
-                openExternal("https://discord.com/developers/applications");
-            }}/> and create a new application. In the 'Bot' section, take the generated token and paste it down below to register your bot.
+            {#if botAccount == null}
+                Go to <TextButton text="Discord Developer Portal" onclick={() => {
+                    openExternal("https://discord.com/developers/applications");
+                }}/> and select your bot. In the 'Bot' section, take the generated token and paste it down below to register your bot.
+            {:else}
+                Go to <TextButton text="Discord Developer Portal" onclick={() => {
+                    openExternal("https://discord.com/developers/applications");
+                }}/> and select <b>{botAccount?.name}</b>. Refresh its token and insert it below.
+            {/if}
         </p>
 
         <TextInput bind:value={token} bind:validated={tokenValidated} placeholder="Token" validationType="token"/>
 
         <div class="w-full flex justify-end mt-3">
-            <Button text="Add Bot" disabled={!tokenValidated} onclick={async () => {
-                await invoke("insert_account", {token: token}).then(async () => {
-                    await loadBots();
-                    dialog.close();
-                })
-            }}/>
+            {#if botAccount == null}
+                <Button text="Add Bot" disabled={!tokenValidated} onclick={async () => {
+                    await invoke("insert_account", {token: token}).then(async () => {
+                        await refreshBots();
+                        dialog.close();
+                    })
+                }}/>
+            {:else}
+                <Button text="Update Token" disabled={!tokenValidated} onclick={async () => {
+                    await invoke("update_account_token", {id: botAccount.id, newToken: token}).then(async () => {
+                        await refreshBots();
+                        dialog.close();
+                    })
+                }}/>
+            {/if}
+            
         </div>
     </div>
 </Dialog>

@@ -6,7 +6,11 @@
     let { children } = $props();
 
     document.documentElement.classList.add("dark");
+
+    document.addEventListener('contextmenu', event => event.preventDefault());
 </script>
+
+<svelte:window oncontextmenu={() => {return false}}/>
 
 <div class="absolute inset-0 stroke-gray-500/5 scale-200">
     {@html icon}

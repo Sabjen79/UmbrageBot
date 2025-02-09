@@ -1,6 +1,12 @@
 <script lang="ts">
+    import { invoke } from "@tauri-apps/api/core";
+    import Button from "../../components/button.svelte";
+    import ContextMenu from "../../components/context_menu/context_menu.svelte";
+    import ContextMenuItem from "../../components/context_menu/context_menu_item.svelte";
+    import Dialog from "../../components/dialog.svelte";
     import IconButton from "../../components/icon_button.svelte";
-    import { type BotAccount } from "./bot_account";
+    import { refreshBots, type BotAccount } from "./bot_accounts";
+    import AddBotDialog from "./add_bot_dialog.svelte";
 
     let {
         account,
@@ -10,41 +16,82 @@
 
     let hover = $state();
     let pressed = $state();
+
+    let contextMenu: ContextMenu;
+
+    // svelte-ignore non_reactive_update
+    let deleteDialog: Dialog;
+    
+    // svelte-ignore non_reactive_update
+    let updateDialog: AddBotDialog;
 </script>
 
-<button
-    onmouseenter={() => { hover = true }}
-    onmouseleave={() => { hover = false; pressed = false }}
-    onmousedown={() => { pressed = true }}
-    onmouseup={() => { pressed = false }}
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div 
     class={`
-        flex flex-col items-center
-        w-35 h-48 rounded-xl z-0
-        duration-200 ease-in-out
-        ${hover ? "cursor-pointer" : ""}
+        relative w-35 h-48 duration-200 ease-in-out rounded-xl 
+        
         ${pressed ? "bg-gray-700 shadow-container -translate-y-0.25" 
         : hover ? "bg-gray-700/60 shadow-container-xl -translate-y-0.5" 
         : "bg-gray-800 shadow-container translate-y-0"}
     `}
->   
+    onmouseenter={() => { hover = true }}
+    onmouseleave={() => { hover = false; pressed = false }}
+    onmouseup={() => { pressed = false }}
+>
+    <button
+        oncontextmenu={(event) => {
+            contextMenu.open(event);
+        }}
+        onmousedown={() => { pressed = true }}
+        class={`
+            flex flex-col items-center
+            z-0 w-full h-full
+            ${hover ? "cursor-pointer" : ""}
+        `}
+    >   
+        <div class={`relative
+            rounded-full w-[80%] mt-[10%] inset-shadow-[0_0_10px_rgba(0,0,0,0.5)]
+            overflow-hidden
+        `}>
+            <img class="-z-2 relative pointer-events-none" 
+                alt={account.name} 
+                src={account.avatarUrl}
+            />
+        </div>
+        <p class="flex-1 h-full align-middle flex items-center">
+            {account.name}
+        </p>
+    </button>
+    
     <div
         class={`
             absolute top-1.5 right-1.5
         `}
     >
-        <IconButton icon="more_vert"/>
+        <IconButton icon="more_vert" onclick={(e: MouseEvent) => {
+            contextMenu.open(e);
+        }}/>
     </div>
+</div>
 
-    <div class={`relative
-        rounded-full w-[80%] mt-[10%] inset-shadow-[0_0_10px_rgba(0,0,0,0.5)]
-        overflow-hidden
-    `}>
-        <img class="-z-2 relative pointer-events-none" 
-            alt={account.name} 
-            src={account.avatarUrl}
-        />
+<Dialog bind:this={deleteDialog} title="Delete Bot">
+    Are you sure you want to remove <b>{account.name}</b>?<br>
+    All its data will be deleted forever.
+    <div class="flex w-full justify-end mt-2">
+        <Button text="Goodbye ;-;" onclick={async () => {
+            deleteDialog.block();
+            await invoke("delete_account", {id: account.id});
+            deleteDialog.unblock();
+            deleteDialog.close();
+            await refreshBots();
+        }}/>
     </div>
-    <p class="flex-1 h-full align-middle flex items-center">
-        {account.name}
-    </p>
-</button>
+</Dialog>
+
+<AddBotDialog bind:this={updateDialog} botAccount={account}/>
+
+<ContextMenu bind:this={contextMenu}>
+    <ContextMenuItem text="Edit Token" icon="edit" onclick={updateDialog.open}/>
+    <ContextMenuItem text="Delete" icon="delete" isRed={true} onclick={deleteDialog.open}/>
+</ContextMenu>

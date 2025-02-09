@@ -100,7 +100,7 @@
                 onmouseenter={() => { errorVisible = true }}
                 onmouseleave={() => { errorVisible = false }}
                 class={`
-                    font-icons text-2xl [font-variation-settings:'FILL'_1,'wght'_400,'GRAD'_0,'opsz'_24]
+                    font-icons text-2xl ![font-variation-settings:'FILL'_1,'wght'_400,'GRAD'_0,'opsz'_24]
                     pb-0.5 pointer-events-auto
                     bg-gray-950
                 `}

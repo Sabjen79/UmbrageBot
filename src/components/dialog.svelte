@@ -1,6 +1,7 @@
 <script lang="ts">
     let { children, title = "" } = $props();
 
+    // TODO: Fix title and close button alignment
     export function open() {
         opened = true;
 
