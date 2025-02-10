@@ -21,7 +21,7 @@
 
     // svelte-ignore non_reactive_update
     let deleteDialog: Dialog;
-    
+
     // svelte-ignore non_reactive_update
     let updateDialog: AddBotDialog;
 </script>
@@ -76,10 +76,13 @@
 </div>
 
 <Dialog bind:this={deleteDialog} title="Delete Bot">
-    Are you sure you want to remove <b>{account.name}</b>?<br>
-    All its data will be deleted forever.
-    <div class="flex w-full justify-end mt-2">
-        <Button text="Goodbye ;-;" onclick={async () => {
+    <p class="mr-10 mb-2">
+        Are you sure you want to remove <b>{account.name}</b>?<br>
+        All its data will be deleted forever.
+    </p>
+    
+    <div class="flex w-full justify-end">
+        <Button isRed={true} text="Goodbye ;-;" onclick={async () => {
             deleteDialog.block();
             await invoke("delete_account", {id: account.id});
             deleteDialog.unblock();
@@ -92,6 +95,6 @@
 <AddBotDialog bind:this={updateDialog} botAccount={account}/>
 
 <ContextMenu bind:this={contextMenu}>
-    <ContextMenuItem text="Edit Token" icon="edit" onclick={updateDialog.open}/>
-    <ContextMenuItem text="Delete" icon="delete" isRed={true} onclick={deleteDialog.open}/>
+    <ContextMenuItem text="Edit Token" icon="edit" onclick={() => updateDialog.open()}/>
+    <ContextMenuItem text="Delete" icon="delete" isRed={true} onclick={() => deleteDialog.open()}/>
 </ContextMenu>

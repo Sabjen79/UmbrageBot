@@ -2,12 +2,11 @@
     let {
         icon = "close",
 
-        // TODO: Add icon variation settings
-        // size = "10",
-        // fill = "1",
-        // weight = "800",
-        // grade = "0",
-        // opticalSize = "24",
+        size = 24,
+        fill = 1,
+        weight = 400,
+        grade = 0,
+        opticalSize = 24,
 
         disabled = $bindable(false),
         onclick = async (e: MouseEvent) => {},
@@ -27,10 +26,20 @@
         onclick(e);
     }}
 >
-    <span class={`
-        font-icons text-2xl -mr-0.5 duration-200
-        ${hover ? "text-gray-100 scale-115 cursor-pointer" : "text-gray-300"}
-    `}>
+    <span 
+        class={`
+            font-icons -mr-0.5 duration-200
+            ${hover ? "text-gray-100 scale-115 cursor-pointer" : "text-gray-300"}
+        `}
+        style={`
+            font-size: ${size}px;
+            font-variation-settings:
+                'FILL' ${fill},
+                'wght' ${weight},
+                'GRAD' ${grade},
+                'opsz' ${opticalSize};
+        `}
+    >
         {icon}
     </span>
 </button>

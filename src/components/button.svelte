@@ -4,6 +4,7 @@
     let {
         text,
         icon = "",
+        isRed = false,
         disabled = $bindable(false),
         onclick = async () => {
             await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -20,11 +21,19 @@
     class={`
         relative flex items-center justify-center
         overflow-visible m-1 p-0 scheme-only-light
-        ${disabled ? "bg-gray-800" : hover && !waiting ? "bg-primary-600" : "bg-primary-100 dark:bg-primary-500"} 
         text-primary-100 border-1 rounded-sm float-left duration-200
         ${hover && !waiting && !disabled ? "cursor-pointer" : "cursor-auto"}
-        ${pressed && !waiting ? "inset-shadow-[0_1px_5px_var(--color-primary-950)]" : waiting ? "inset-shadow-[0_40px_5px_var(--color-primary-950)]" : ""}
-        ${disabled ? "border-gray-900" : waiting ? "border-primary-500" : "border-primary-600"}
+
+        ${disabled ? "bg-gray-800" 
+        : hover && !waiting ? isRed ? "bg-red-800" : "bg-primary-600" 
+        : isRed ? "bg-red-700" : "bg-primary-500"}
+
+        ${pressed && !waiting ? "inset-shadow-[0_1px_5px_var(--color-primary-950)]" 
+        : waiting ? "inset-shadow-[0_40px_5px_var(--color-primary-950)]" : ""}
+        
+        ${disabled ? "border-gray-900" 
+        : waiting ? isRed ? "border-red-700" : "border-primary-500" 
+        : isRed ? "border-red-800" : "border-primary-600"}
     `}
     onmouseenter={() => {
         hover = true;
@@ -64,7 +73,7 @@
             ${waiting ? "opacity-100" : "opacity-0"}
         `}
     >
-        <LoadingSpinner />
+        <LoadingSpinner svgCLass={isRed ? "stroke-red-700" : "stroke-primary-500"}/>
     </div>
 
     <div

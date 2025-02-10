@@ -27,13 +27,11 @@
     <div class="w-90 flex flex-col justify-center">
         <p class="text-center mb-3 mt-0">
             {#if botAccount == null}
-                Go to <TextButton text="Discord Developer Portal" onclick={() => {
-                    openExternal("https://discord.com/developers/applications");
-                }}/> and select your bot. In the 'Bot' section, take the generated token and paste it down below to register your bot.
+                Go to <TextButton text="Discord Developer Portal" link="https://discord.com/developers/applications"/>
+                and select your bot. In the 'Bot' section, take the generated token and paste it down below to register your bot.
             {:else}
-                Go to <TextButton text="Discord Developer Portal" onclick={() => {
-                    openExternal("https://discord.com/developers/applications");
-                }}/> and select <b>{botAccount?.name}</b>. Refresh its token and insert it below.
+                Go to <TextButton text="Discord Developer Portal" link="https://discord.com/developers/applications"/> 
+                and select <b>{botAccount?.name}</b>. Refresh its token and insert it below.
             {/if}
         </p>
 

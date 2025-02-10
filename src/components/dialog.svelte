@@ -1,7 +1,6 @@
 <script lang="ts">
     let { children, title = "" } = $props();
 
-    // TODO: Fix title and close button alignment
     export function open() {
         opened = true;
 
@@ -68,7 +67,7 @@
         >
             <button 
                 class={`
-                    absolute top-3 right-3
+                    absolute top-2 right-3
                     bg-transparent border-0
                     duration-200 ease-out
                     opacity-60 hover:opacity-100 

@@ -1,11 +1,20 @@
 <script lang="ts">
+    import ContextMenu from "./context_menu/context_menu.svelte";
+    import ContextMenuItem from "./context_menu/context_menu_item.svelte";
+    import { open as openExternal } from "@tauri-apps/plugin-shell";
+
     let {
         text = "Text Button",
-        onclick
+        link = null,
+        onclick = () => {
+            openExternal(link);
+        }
     } = $props();
 
     let hover = $state(false);
     let pressed = $state(false);
+
+    let contextMenu: ContextMenu;
 </script>
 
 <button 
@@ -19,7 +28,8 @@
     onmouseleave={() => { hover = false; pressed = false; }}
     onmousedown={() => { pressed = true; }}
     onmouseup={() => { pressed = false; }}
-    onclick={onclick}
+    oncontextmenu={(e) => {contextMenu.open(e)}}
+    onclick={onclick()}
 >
     <div id="content">{text}</div>
     <div 
@@ -27,6 +37,16 @@
         class={{hover, pressed}}
     >{text}</div>
 </button>
+
+<ContextMenu bind:this={contextMenu}>
+    <ContextMenuItem icon="open_in_new" text="Open Link" {onclick}/>
+    {#if link != null}
+        <ContextMenuItem icon="content_copy" text="Copy Link" onclick={async () => {
+            await navigator.clipboard.writeText(link);
+        }}/>
+    {/if}
+    
+</ContextMenu>
 
 <style>
     /* Tailwind doesn't have clip-path :( */
