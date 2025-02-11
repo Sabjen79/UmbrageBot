@@ -5,7 +5,7 @@
     import ContextMenuItem from "../../components/context_menu/context_menu_item.svelte";
     import Dialog from "../../components/dialog.svelte";
     import IconButton from "../../components/icon_button.svelte";
-    import { refreshBots, type BotAccount } from "./bot_accounts";
+    import { activeBot, refreshBots, type BotAccount } from "./bot_accounts";
     import AddBotDialog from "./add_bot_dialog.svelte";
 
     let {
@@ -27,6 +27,7 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div 
     class={`
         relative w-35 h-48 duration-200 ease-in-out rounded-xl 
@@ -38,6 +39,7 @@
     onmouseenter={() => { hover = true }}
     onmouseleave={() => { hover = false; pressed = false }}
     onmouseup={() => { pressed = false }}
+    onclick={() => {$activeBot = account;}}
 >
     <button
         oncontextmenu={(event) => {

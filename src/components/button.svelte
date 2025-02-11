@@ -73,7 +73,7 @@
             ${waiting ? "opacity-100" : "opacity-0"}
         `}
     >
-        <LoadingSpinner svgCLass={isRed ? "stroke-red-700" : "stroke-primary-500"}/>
+        <LoadingSpinner svgClass={isRed ? "stroke-red-700" : "stroke-primary-500"}/>
     </div>
 
     <div

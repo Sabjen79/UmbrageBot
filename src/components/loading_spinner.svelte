@@ -1,13 +1,13 @@
 <script lang="ts">
   let {
-    svgCLass = 'stroke-primary-500'
+    svgClass = 'stroke-primary-500'
   } = $props();
 </script>
 
 <div class="loader">
   {#each {length: 2} as _, index}
     <svg
-      class="{svgCLass}"
+      class="{svgClass}"
       viewBox="0 0 200 173.20508075688772"
       ><path
         fill="transparent"

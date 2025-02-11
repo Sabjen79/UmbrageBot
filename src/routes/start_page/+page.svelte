@@ -4,17 +4,47 @@
   import { invoke } from "@tauri-apps/api/core";
   import LoadingSpinner from "../../components/loading_spinner.svelte";
   import AddBotDialog from "./add_bot_dialog.svelte";
-  import { allBots, refreshBots, type BotAccount } from "./bot_accounts";
+  import { activeBot, allBots, refreshBots, type BotAccount } from "./bot_accounts";
   import BotCard from "./bot_card.svelte";
 
   // svelte-ignore non_reactive_update
   let addBotDialog: AddBotDialog;
+
+  activeBot.subscribe(async (value) => {
+    if(value == null) return;
+
+    await invoke("start_bot", {token: value.token});
+
+    botLoaded = true;
+  })
+
+  let botLoaded = $state(false);
 </script>
+
+<div
+  class={`
+    absolute w-60 h-20 select-none
+    border-1 rounded-2xl flex items-center
+    border-gray-950 bg-gray-900
+    duration-400 ease-in-out shadow-container
+    ${botLoaded ? "w-[110%] h-[110%]" : "w-60 h-20"}
+    ${$activeBot != null ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2.5"}
+  `}
+>
+  <div class="w-20 h-20 p-5 duration-200 {botLoaded ? "opacity-0" : "opacity-100"}">
+    <LoadingSpinner />
+  </div>
+  <div class="flex-1 text-center pr-5 duration-200 {botLoaded ? "opacity-0" : "opacity-100"}">
+    <b>{$activeBot?.name}</b><br> is waking up...
+  </div>
+</div>
 
 <div class={`maindiv shadow-container
   relative w-185 h-135 select-none
   border-1 rounded-2xl flex
-  border-gray-950 bg-gray-900 
+  border-gray-950 bg-gray-900
+  duration-300 ease-in-out
+  ${$activeBot != null ? "opacity-0 pointer-events-none -translate-y-2.5" : ""}
 `}>
   {#await refreshBots()}
     <div class="w-full h-full flex">
@@ -55,7 +85,6 @@
     </div>
   {/await}
 </div>
-
 
 
 <style>

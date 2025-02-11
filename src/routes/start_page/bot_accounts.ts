@@ -15,3 +15,5 @@ export async function refreshBots() {
         allBots.set(result as BotAccount[])
     });
 }
+
+export let activeBot = writable<BotAccount | null>(null);

@@ -6,6 +6,7 @@ mod config;
 mod database;
 mod logging;
 mod input_validator;
+mod bot;
 
 pub static APP: OnceLock<AppHandle> = OnceLock::new();
 
@@ -22,7 +23,9 @@ pub fn run() {
             database::bot_accounts::get_all_accounts,
             database::bot_accounts::insert_account,
             database::bot_accounts::update_account_token,
-            database::bot_accounts::delete_account
+            database::bot_accounts::delete_account,
+
+            bot::start_bot
         ])
         .setup(|app| {
             APP.get_or_init(|| app.handle().to_owned());
