@@ -1,28 +1,26 @@
 use std::{
-    error::Error,
-    fs::{self, OpenOptions},
-    io::Write,
-    sync::OnceLock,
-    time::{SystemTime, UNIX_EPOCH},
+    error::Error, fs::{self, OpenOptions}, io::Write, sync::OnceLock, time::{SystemTime, UNIX_EPOCH}
 };
 
 static LOG_FILE: OnceLock<String> = OnceLock::new();
 
-pub fn info(message: &str) {
-    let _ = write(message, "INFO");
-    println!("{}", message);
+macro_rules! info {
+    ($($args: tt)*) => {
+        let _ = crate::logging::write_log(format!($($args)*), "INFO");
+        println!($($args)*);
+    }
 }
 
-// pub fn warn(message: &str) {
-//     let _ = write(message, "WARN");
-// }
-
 // TODO: Implement error alerts
-// pub fn severe(message: &str) {
-//     let _ = write(message, "SEVERE");
+macro_rules! error {
+    ($($args: tt)*) => {
+        let _ = crate::logging::write_log(format!($($args)*), "ERROR");
+        println!($($args)*);
+    }
+}
 
-//     APP.get().unwrap().emit("severe_log", message).unwrap();
-// }
+pub(crate) use info;
+pub(crate) use error;
 
 pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
     let dir_path = format!("{}{}", config_path, "\\logs");
@@ -39,7 +37,7 @@ pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
 
     for file in fs::read_dir(&dir_path)? {
         let file = file?;
-        let st: String = file.file_name().to_str().unwrap().chars().skip(5).collect();
+        let st: String = file.file_name().to_str().unwrap().chars().skip(4).collect();
 
         let date: u128 = match st.parse() {
             Ok(d) => d,
@@ -54,14 +52,14 @@ pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
         }
     }
 
-    LOG_FILE.get_or_init(|| format!("{}\\logs_{}.txt", &dir_path, current_time));
+    LOG_FILE.get_or_init(|| format!("{}\\log_{}.txt", &dir_path, current_time));
 
-    info("Logging Initialized!");
+    info!("{}", "Logging Initialized. Hello!");
 
     Ok(())
 }
 
-fn write(message: &str, level: &str) -> Result<(), Box<dyn Error>> {
+pub fn write_log(message: String, level: &str) -> Result<(), Box<dyn Error>> {
     let path = LOG_FILE.get().unwrap();
 
     if !fs::exists(path)? {
@@ -82,3 +80,4 @@ fn write(message: &str, level: &str) -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+

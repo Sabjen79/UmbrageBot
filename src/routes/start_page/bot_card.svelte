@@ -38,14 +38,18 @@
     `}
     onmouseenter={() => { hover = true }}
     onmouseleave={() => { hover = false; pressed = false }}
-    onmouseup={() => { pressed = false }}
-    onclick={() => {$activeBot = account;}}
+    onmouseup={() => {pressed = false}}
 >
     <button
         oncontextmenu={(event) => {
             contextMenu.open(event);
         }}
         onmousedown={() => { pressed = true }}
+        onmouseup={(event) => { 
+            if(event.button != 0) return;
+            
+            $activeBot = account;
+        }}
         class={`
             flex flex-col items-center
             z-0 w-full h-full

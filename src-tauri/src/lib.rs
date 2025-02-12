@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use tauri::{AppHandle, Manager};
+use tauri::{menu::{Menu, MenuItem}, tray::{MouseButton, TrayIconBuilder, TrayIconEvent}, AppHandle, Manager};
 
 mod config;
 mod database;
@@ -28,6 +28,37 @@ pub fn run() {
             bot::start_bot
         ])
         .setup(|app| {
+            let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&quit_i])?;
+
+            TrayIconBuilder::new()
+                .tooltip("Umbrage Bot")
+                .icon(app.default_window_icon().unwrap().clone())
+                .menu(&menu)
+                .show_menu_on_left_click(false)
+                .on_menu_event(|_, event| match event.id.as_ref() {
+                    "quit" => {
+                        tokio::spawn(async move {
+                            bot::shutdown().await;
+                        });
+                    }
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| match event {
+                    TrayIconEvent::DoubleClick {
+                      button: MouseButton::Left,
+                      ..
+                    } => {
+                      let app = tray.app_handle();
+                      if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                      }
+                    }
+                    _ => {}
+                })
+                .build(app)?;
+
             APP.get_or_init(|| app.handle().to_owned());
             
             let config_path = format!(

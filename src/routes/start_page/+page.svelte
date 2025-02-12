@@ -13,7 +13,11 @@
   activeBot.subscribe(async (value) => {
     if(value == null) return;
 
-    await invoke("start_bot", {token: value.token});
+    // Yes, loading time is artificially increased, fight me
+    await Promise.all([
+      invoke("start_bot", { token: value.token }),
+      new Promise(resolve => setTimeout(resolve, 1500))
+    ]);
 
     botLoaded = true;
   })

@@ -31,7 +31,7 @@
     <button
         class="titlebar-button {buttonStyle}"
         id="titlebar-close"
-        onclick={getCurrentWindow().close}
+        onclick={getCurrentWindow().hide}
     >
         <span class="font-icons text-2xl"> close </span>
     </button>

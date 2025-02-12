@@ -1,6 +1,8 @@
 use rusqlite::Connection;
 use std::sync::OnceLock;
 
+use crate::logging::info;
+
 use super::config::config_path;
 
 pub mod bot_accounts;
@@ -22,6 +24,8 @@ pub(super) fn initialize() {
             (),
         )
         .unwrap();
+
+    info!("{}", "Database Initialized");
 }
 
 pub(in crate::database) fn get_connection() -> Connection {
