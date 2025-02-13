@@ -6,6 +6,8 @@
   import AddBotDialog from "./add_bot_dialog.svelte";
   import { activeBot, allBots, refreshBots, type BotAccount } from "./bot_accounts";
   import BotCard from "./bot_card.svelte";
+    import { redirect } from "@sveltejs/kit";
+    import { goto } from "$app/navigation";
 
   // svelte-ignore non_reactive_update
   let addBotDialog: AddBotDialog;
@@ -20,6 +22,9 @@
     ]);
 
     botLoaded = true;
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    await goto("/dashboard/account", { replaceState: true });
   })
 
   let botLoaded = $state(false);
@@ -27,11 +32,14 @@
 
 <div
   class={`
-    absolute w-60 h-20 select-none
+    absolute select-none
     border-1 rounded-2xl flex items-center
     border-gray-950 bg-gray-900
-    duration-400 ease-in-out shadow-container
-    ${botLoaded ? "w-[110%] h-[110%]" : "w-60 h-20"}
+    duration-300 ease-in-out shadow-container
+    ${botLoaded 
+    ? "left-14 xl:left-47 right-2 inset-y-2 top-8" 
+    : "inset-x-[calc(50%-120px)] inset-y-[calc(50%-40px)]"}
+
     ${$activeBot != null ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2.5"}
   `}
 >
