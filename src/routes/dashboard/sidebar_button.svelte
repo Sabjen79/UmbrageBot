@@ -26,7 +26,7 @@
         console.log(page.url.pathname);
     }}
     class={`
-        w-40 flex items-center my-5
+        flex items-start my-3
         ${hover ? "cursor-pointer" : ""}
         ${active || pressed ? "text-primary-600" : hover ? "text-primary-400" : "text-gray-100"}
     `}
@@ -38,6 +38,18 @@
         ${hover && !pressed || active ? "scale-120" : "scale-100"}
     `}>
         {icon}
+    </div>
+
+    <div
+        class={`
+            fixed left-13 px-2 rounded-md 
+            text-md text-gray-100 translate-y-1
+            bg-gray-800 shadow-container xl:invisible
+            origin-left duration-200 pointer-events-none
+            ${hover ? "opacity-100 scale-100" : "opacity-0 scale-50"}
+        `}
+    >
+        {text}
     </div>
     
     <div class={`

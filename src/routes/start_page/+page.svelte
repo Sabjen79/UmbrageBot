@@ -37,7 +37,7 @@
     border-gray-950 bg-gray-900
     duration-300 ease-in-out shadow-container
     ${botLoaded 
-    ? "left-14 xl:left-47 right-2 inset-y-2 top-8" 
+    ? "left-14 xl:left-37 right-2 inset-y-2 top-8" 
     : "inset-x-[calc(50%-120px)] inset-y-[calc(50%-40px)]"}
 
     ${$activeBot != null ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2.5"}

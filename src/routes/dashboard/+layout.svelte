@@ -5,13 +5,9 @@
 </script>
 
 <main class="absolute inset-2 top-8 overflow-hidden z-1">
-    
-    <div class="fade">
-        <Sidebar />
-    </div>
-    
+
     <div class={`
-        absolute inset-0 left-12 xl:left-45
+        absolute inset-0 left-12 xl:left-35
         flex items-center justify-center
         bg-gray-900 rounded-lg shadow-container
     `}>
@@ -20,7 +16,9 @@
         </div>
     </div>
     
-    
+    <div class="fade">
+        <Sidebar />
+    </div>
 
 </main>
 
