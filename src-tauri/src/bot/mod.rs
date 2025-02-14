@@ -60,6 +60,8 @@ pub async fn shutdown() {
         Some(notify) => {
             notify.notify_one();
         },
-        None => {}
+        None => {
+            std::process::exit(0);
+        }
     }
 }
