@@ -57,6 +57,10 @@
     @apply leading-none tracking-normal whitespace-nowrap inline-block [font-variation-settings:"FILL"_0,"wght"_300,"GRAD"_0,"opsz"_24];
 }
 
+h1 {
+    @apply text-3xl font-semibold ml-2;
+}
+
 :root {
     @apply
         font-sourcesans m-0 p-0 overflow-hidden

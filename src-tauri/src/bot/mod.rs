@@ -1,15 +1,23 @@
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 
 use event_handler::EventHandler;
-use serenity::{all::GatewayIntents, Client};
+use serenity::{all::{GatewayIntents, Http}, Client};
 use tokio::sync::Notify;
 
 use crate::{database::bot_accounts::BotAccount, logging::error};
 
+mod event_handler;
+mod account_manager;
+
 static ACTIVE_BOT: OnceLock<BotAccount> = OnceLock::new();
 static SHUTDOWN_NOTIFY: OnceLock<Notify> = OnceLock::new();
+static HTTP: OnceLock<Arc<Http>> = OnceLock::new();
 
-mod event_handler;
+// pub async fn get_user() -> CurrentUser {
+//     let http = HTTP.get().unwrap();
+
+//     http.get_current_user().await.unwrap()
+// }
 
 #[tauri::command]
 pub async fn start_bot(token: &str) -> Result<(), String> {
@@ -37,6 +45,10 @@ async fn start() {
             .event_handler(EventHandler)
             .await
             .expect("Err creating client");
+
+    HTTP.get_or_init(|| client.http.clone());
+
+    // account_manager::initialize();
 
     SHUTDOWN_NOTIFY.get_or_init(|| Notify::new());
 

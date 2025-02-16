@@ -8,10 +8,13 @@
 
     <div class={`
         absolute inset-0 left-12 xl:left-35
-        flex items-center justify-center
+        flex items-center justify-center overflow-clip
         bg-gray-900 rounded-lg shadow-container
     `}>
-        <div class="fade">
+        <div class={`
+            fade absolute flex flex-col
+            inset-0 overflow-y-scroll py-4 px-3 max-w-300 m-auto
+        `}>
             {@render children()}
         </div>
     </div>
