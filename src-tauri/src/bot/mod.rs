@@ -9,7 +9,7 @@ use crate::{database::bot_accounts::BotAccount, logging::error};
 mod event_handler;
 mod account_manager;
 
-static ACTIVE_BOT: OnceLock<BotAccount> = OnceLock::new();
+pub static ACTIVE_BOT: OnceLock<BotAccount> = OnceLock::new();
 static SHUTDOWN_NOTIFY: OnceLock<Notify> = OnceLock::new();
 static HTTP: OnceLock<Arc<Http>> = OnceLock::new();
 
@@ -25,7 +25,7 @@ pub async fn start_bot(token: &str) -> Result<(), String> {
     
     match account_res {
         Ok(account) => {
-            ACTIVE_BOT.get_or_init(|| account);
+            ACTIVE_BOT.set(account).unwrap();
 
             tokio::spawn(async {
                 start().await;
@@ -40,17 +40,19 @@ pub async fn start_bot(token: &str) -> Result<(), String> {
 }
 
 async fn start() {
+    crate::config::initialize_bot_config().await;
+
     let mut client =
         Client::builder(&ACTIVE_BOT.get().unwrap().token, GatewayIntents::all())
             .event_handler(EventHandler)
             .await
             .expect("Err creating client");
 
-    HTTP.get_or_init(|| client.http.clone());
+    HTTP.set(client.http.clone()).unwrap();
 
     // account_manager::initialize();
 
-    SHUTDOWN_NOTIFY.get_or_init(|| Notify::new());
+    SHUTDOWN_NOTIFY.set(Notify::new()).unwrap();
 
     let shard_manager = client.shard_manager.clone();
 

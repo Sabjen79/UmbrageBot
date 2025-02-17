@@ -8,7 +8,7 @@ mod logging;
 mod input_validator;
 mod bot;
 
-pub static APP: OnceLock<AppHandle> = OnceLock::new();
+pub static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -25,7 +25,9 @@ pub fn run() {
             database::bot_accounts::update_account_token,
             database::bot_accounts::delete_account,
 
-            bot::start_bot
+            bot::start_bot,
+            config::bot_config::get_bot_config,
+            config::bot_config::set_bot_config
         ])
         .setup(|app| {
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -59,7 +61,7 @@ pub fn run() {
                 })
                 .build(app)?;
 
-            APP.get_or_init(|| app.handle().to_owned());
+            APP_HANDLE.set(app.handle().to_owned()).unwrap();
             
             let config_path = format!(
                 "{}\\UmbrageBot",

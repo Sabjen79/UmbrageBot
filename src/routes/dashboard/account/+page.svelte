@@ -1,7 +1,10 @@
 <script lang="ts">
+    import SettingsRow from "../../../components/settings_row.svelte";
     import { activeBot } from "../../start_page/bot_accounts";
+    import TabSelector from "./tab_selector.svelte";
+    import UsernameTab from "./username_tab.svelte";
 
-
+    let tabIndex = 0;
 </script>
 
 <div
@@ -30,7 +33,37 @@
         <p class="font-semibold text-3xl">
             {$activeBot?.name}
         </p>
+    </div>
+</div>
 
+<div
+    class={`
+        w-full px-2 mt-2
+    `}
+>
+    {#each ["Username", "Status", "Avatar", "Banner"] as selector, index}
+        <TabSelector text={selector} active={tabIndex == index} onclick={() => {
+            tabIndex = index
+        }}/>
+    {/each}
+    <div
+        class={`w-full border-b-1 border-b-gray-600`}
+    ></div>
+    <div
+        class={`-mt-0.5 w-25 border-b-3 border-b-primary-500 duration-250 ease-out`}
+        style="transform: translateX({tabIndex * 100}%)"
+    ></div>
+    
+    <div class="w-full overflow-x-clip">
+        <div
+            class={`flex w-[400%] duration-250 ease-out`}
+            style="transform: translateX(-{tabIndex * 100/4}%)"
+        >
+            <UsernameTab />
+            <UsernameTab />
+            <UsernameTab />
+            <UsernameTab />
+        </div>
     </div>
     
 </div>

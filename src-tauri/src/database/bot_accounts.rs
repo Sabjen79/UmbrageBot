@@ -1,7 +1,7 @@
 use super::get_connection;
 use serenity::prelude::*;
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct BotAccount {
     pub id: String,

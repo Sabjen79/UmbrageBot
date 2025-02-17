@@ -10,7 +10,7 @@ pub mod bot_accounts;
 static DB_PATH: OnceLock<String> = OnceLock::new();
 
 pub(super) fn initialize() {
-    DB_PATH.get_or_init(|| config_path("\\database.db"));
+    DB_PATH.set(config_path("\\database.db")).unwrap();
 
     get_connection()
         .execute(

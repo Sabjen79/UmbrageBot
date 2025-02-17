@@ -52,7 +52,7 @@ pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
         }
     }
 
-    LOG_FILE.get_or_init(|| format!("{}\\log_{}.txt", &dir_path, current_time));
+    LOG_FILE.set(format!("{}\\log_{}.txt", &dir_path, current_time))?;
 
     info!("{}", "Logging Initialized. Hello!");
 
