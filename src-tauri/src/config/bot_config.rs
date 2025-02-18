@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 use tokio::sync::{RwLock, RwLockReadGuard};
 use std::io::prelude::*;
-use crate::{logging::info, APP_HANDLE};
+use crate::{logging::log_info, APP_HANDLE};
 
 pub const fn default_u32<const V: u32>() -> u32 {
     V
@@ -34,8 +34,8 @@ static CONFIG: LazyLock<RwLock<BotConfig>> = LazyLock::new(||
 static CONFIG_PATH: OnceLock<String> = OnceLock::new();
 
 //==========================================================================//
-// Commands for frontend. Since they inevitably clone objects, the backend
-// should call get_config() and edit_config() instead!
+// Commands for frontend. Since they inevitably clone responses, the backend
+// should only call get_config() and edit_config() instead
 //==========================================================================//
 
 #[tauri::command]
@@ -90,7 +90,7 @@ pub(super) async fn initialize() -> Result<(), Box<dyn Error>> {
             *CONFIG.write().await = config;
         }
         Err(_) => {
-            info!("Bot configuration could not be found! Creating new one");
+            log_info!("Bot configuration could not be found! Creating new one");
 
             let dir_path = super::config_path("//config");
 
@@ -99,6 +99,8 @@ pub(super) async fn initialize() -> Result<(), Box<dyn Error>> {
             }
 
             save_config().await?;
+
+            log_info!("Loaded config");
             
             return Ok(());
         }

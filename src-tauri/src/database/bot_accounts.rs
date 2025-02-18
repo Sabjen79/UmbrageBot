@@ -85,6 +85,8 @@ pub async fn update_account_token(id: &str, new_token: &str) -> Result<(), Strin
     Ok(())
 }
 
+
+// TODO: Add option to delete data
 #[tauri::command]
 pub fn delete_account(id: &str) -> Result<(), String> {
     let conn = get_connection();

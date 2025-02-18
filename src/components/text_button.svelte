@@ -48,8 +48,8 @@
     
 </ContextMenu>
 
+<!-- TODO: Convert to tailwind -->
 <style>
-    /* Tailwind doesn't have clip-path :( */
     #border {
         position: absolute;
         top: 0;

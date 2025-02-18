@@ -26,11 +26,11 @@
             w-full h-full overflow-visible
         `}
         viewBox="50 0 250 173.20508075688772"
-        stroke={toggled ? "var(--color-gray-400)" : "var(--color-gray-500)"}
+        stroke={toggled ? "var(--color-gray-400)" : "var(--color-gray-600)"}
         stroke-width=10
     ><path
         style="transition: 0.2s;"
-        fill={toggled ? "var(--color-primary-500)" : "var(--color-gray-700)"}
+        fill={toggled ? "var(--color-primary-500)" : "var(--color-gray-800)"}
         d="M0 86.60254037844386L50 0L300 0L350 86.60254037844386L300 173.20508075688772L50 173.20508075688772Z"
     ></path></svg
     >

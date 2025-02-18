@@ -4,7 +4,7 @@ use event_handler::EventHandler;
 use serenity::{all::{GatewayIntents, Http}, Client};
 use tokio::sync::Notify;
 
-use crate::{database::bot_accounts::BotAccount, logging::error};
+use crate::{database::bot_accounts::BotAccount, logging::log_error};
 
 mod event_handler;
 mod account_manager;
@@ -39,6 +39,7 @@ pub async fn start_bot(token: &str) -> Result<(), String> {
     }
 }
 
+// FIXME: Go back to homescreen when an error occurs
 async fn start() {
     crate::config::initialize_bot_config().await;
 
@@ -65,7 +66,7 @@ async fn start() {
     });
 
     if let Err(why) = client.start().await {
-        error!("Discord client error: {why:?}");
+        log_error!("Discord client error: {why:?}");
     }
 }
 

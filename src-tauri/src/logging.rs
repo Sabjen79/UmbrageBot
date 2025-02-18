@@ -4,7 +4,7 @@ use std::{
 
 static LOG_FILE: OnceLock<String> = OnceLock::new();
 
-macro_rules! info {
+macro_rules! log_info {
     ($($args: tt)*) => {
         let _ = crate::logging::write_log(format!($($args)*), "INFO");
         println!($($args)*);
@@ -12,15 +12,15 @@ macro_rules! info {
 }
 
 // TODO: Implement error alerts
-macro_rules! error {
+macro_rules! log_error {
     ($($args: tt)*) => {
         let _ = crate::logging::write_log(format!($($args)*), "ERROR");
         println!($($args)*);
     }
 }
 
-pub(crate) use info;
-pub(crate) use error;
+pub(crate) use log_info;
+pub(crate) use log_error;
 
 pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
     let dir_path = format!("{}{}", config_path, "\\logs");
@@ -54,7 +54,7 @@ pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
 
     LOG_FILE.set(format!("{}\\log_{}.txt", &dir_path, current_time))?;
 
-    info!("{}", "Logging Initialized. Hello!");
+    log_info!("{}", "Logging Initialized. Hello!");
 
     Ok(())
 }

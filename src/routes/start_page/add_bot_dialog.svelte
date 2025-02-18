@@ -35,7 +35,13 @@
             {/if}
         </p>
 
-        <TextInput bind:value={token} bind:validated={tokenValidated} placeholder="Token" validationType="token"/>
+        <TextInput 
+            bind:value={token} 
+            bind:validated={tokenValidated} 
+            placeholder="Token" 
+            validationType="token"
+            fastValidate={true}
+        />
 
         <div class="w-full flex justify-end mt-3">
             {#if botAccount == null}

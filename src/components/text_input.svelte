@@ -6,6 +6,7 @@
         validated = $bindable(false),
         placeholder = "Input Text",
         validationType = "",
+        fastValidate = false
     } = $props();
 
     let hover = $state(false);
@@ -23,6 +24,8 @@
     };
 
     async function validationFunc() {
+        if(validationType == "") return;
+
         firstValidation = false;
         waiting = true;
         validated = false;
@@ -79,41 +82,47 @@
             bind:value
             placeholder={placeholder}
             onfocusin={() => { focus = true }}
-            onfocusout={() => { focus = false; }}
+            onfocusout={() => { focus = false; validationFunc() }}
             onmouseenter={() => { hover = true }}
             onmouseleave={() => { hover = false }}
             onkeypress={(event) => {
                 if(event.key == 'Enter') document.querySelector("input")?.blur();
             }}
-            oninput={validationFunc} 
+            oninput={fastValidate ? validationFunc : null}
         />
 
         <div
             class={`
-                relative h-full w-7.5 text-red-700
-                justify-end items-center pointer-events-none
+                absolute h-full w-7.5 text-red-700 right-2
+                flex justify-end items-center pointer-events-none
                 duration-200 ease-in-out overflow-visible
-                ${!firstValidation && !validated ? "opacity-100 flex" : "opacity-0 hidden"}
-            `}>
+                ${!firstValidation && !validated ? "opacity-100" : "opacity-0"}
+        `}>
 
             <button
-                onmouseenter={() => { errorVisible = true }}
+                onmouseenter={() => {
+                    if(!firstValidation && !validated)
+                        errorVisible = true
+                }}
                 onmouseleave={() => { errorVisible = false }}
                 class={`
                     font-icons text-2xl ![font-variation-settings:'FILL'_1,'wght'_400,'GRAD'_0,'opsz'_24]
-                    pb-0.5 pointer-events-auto
+                    pb-0.5 ${!firstValidation && !validated ? "pointer-events-auto" : "pointer-events-none"}
                     bg-gray-950
                 `}
             >
                 warning
             </button>
         </div>
+
         <div class={`
                 absolute bg-red-700 text-gray-950
-                right-2 top-0 -z-1
+                right-4 top-0 -z-1 !text-ellipsis translate-x-2
                 px-2 py-0.5 text-base duration-250 ease-out
-                rounded-t-md pointer-events-none overflow-hidden
-                ${errorVisible ? "-translate-y-full" : "translate-y-0"}
+                rounded-t-md pointer-events-none overflow-clip
+                ${errorVisible 
+                ? "-translate-y-full [clip-path:polygon(0_0,_100%_0%,100%_100%,0_100%)]"
+                : "translate-y-0 [clip-path:polygon(0_0,_100%_0%,100%_50%,0_50%)]"}
             `}>
 
             {lastError}

@@ -1,5 +1,6 @@
 <script lang="ts">
-    import SettingsRow from "../../../components/settings_row.svelte";
+    import Divider from "../../../components/divider.svelte";
+import SettingsRow from "../../../components/settings_row.svelte";
     import { activeBot } from "../../start_page/bot_accounts";
     import TabSelector from "./tab_selector.svelte";
     import UsernameTab from "./username_tab.svelte";
@@ -46,11 +47,11 @@
             tabIndex = index
         }}/>
     {/each}
+    
+    <Divider/>
+
     <div
-        class={`w-full border-b-1 border-b-gray-600`}
-    ></div>
-    <div
-        class={`-mt-0.5 w-25 border-b-3 border-b-primary-500 duration-250 ease-out`}
+        class={`-mt-0.5 -mb-0.25 w-25 border-b-3 border-b-primary-500 duration-250 ease-out`}
         style="transform: translateX({tabIndex * 100}%)"
     ></div>
     

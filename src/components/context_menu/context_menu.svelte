@@ -3,7 +3,7 @@
         children
     } = $props();
 
-    // TODO: Fix out of bounds menu
+    // TODO: Position menu to not go outside viewport
     let opened = $state(false);
     let visible = $state(false);
 

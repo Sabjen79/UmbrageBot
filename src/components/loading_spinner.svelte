@@ -17,7 +17,7 @@
   {/each}
   
 </div>
-
+<!-- TODO: Convert to tailwind -->
 <style>
   .loader {
     display: flex;

@@ -1,6 +1,7 @@
 use std::sync::OnceLock;
 
 use tauri::{menu::{Menu, MenuItem}, tray::{MouseButton, TrayIconBuilder, TrayIconEvent}, AppHandle, Manager};
+use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 mod config;
 mod database;
@@ -38,8 +39,10 @@ pub fn run() {
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&menu)
                 .show_menu_on_left_click(false)
-                .on_menu_event(|_, event| match event.id.as_ref() {
+                .on_menu_event(|app, event| match event.id.as_ref() {
                     "quit" => {
+                        app.save_window_state(StateFlags::all()).unwrap_or(());
+
                         tokio::spawn(async move {
                             bot::shutdown().await;
                         });
