@@ -1,9 +1,12 @@
 <script lang="ts">
+    import { invoke } from "@tauri-apps/api/core";
+    import Button from "../../../components/button.svelte";
     import Divider from "../../../components/divider.svelte";
 import SettingsRow from "../../../components/settings_row.svelte";
     import { activeBot } from "../../start_page/bot_accounts";
     import TabSelector from "./tab_selector.svelte";
     import UsernameTab from "./username_tab.svelte";
+    import { goto } from "$app/navigation";
 
     let tabIndex = 0;
 </script>
@@ -34,6 +37,23 @@ import SettingsRow from "../../../components/settings_row.svelte";
         <p class="font-semibold text-3xl">
             {$activeBot?.name}
         </p>
+    </div>
+
+    <div
+        class={`
+            absolute right-5 top-6
+        `}
+    >
+        <Button 
+            icon="power_settings_new"
+            isRed={true}
+            onclick={async () => {
+                await invoke("logout");
+
+                $activeBot = null;
+                await goto("/start_page");
+            }}
+        />
     </div>
 </div>
 

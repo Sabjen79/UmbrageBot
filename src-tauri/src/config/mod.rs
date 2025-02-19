@@ -13,8 +13,8 @@ pub fn initialize(config_path: &str) {
     log_info!("{}", "Config Initialized");
 }
 
-pub async fn initialize_bot_config() {
-    match bot_config::initialize().await {
+pub async fn initialize_bot_config(id: &str) {
+    match bot_config::initialize(id).await {
         Ok(_) => {},
         Err(e) => {
             log_error!("Error while initializing Config: {}", e);

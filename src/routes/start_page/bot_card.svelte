@@ -7,6 +7,7 @@
     import IconButton from "../../components/icon_button.svelte";
     import { activeBot, refreshBots, type BotAccount } from "./bot_accounts";
     import AddBotDialog from "./add_bot_dialog.svelte";
+    import Checkbox from "../../components/checkbox.svelte";
 
     let {
         account,
@@ -24,6 +25,8 @@
 
     // svelte-ignore non_reactive_update
     let updateDialog: AddBotDialog;
+
+    let deleteData = $state(true);
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -82,15 +85,18 @@
 </div>
 
 <Dialog bind:this={deleteDialog} title="Delete Bot">
-    <p class="mr-10 mb-2">
-        Are you sure you want to remove <b>{account.name}</b>?<br>
-        All its data will be deleted forever.
+    <p class="mx-2 mb-2 text-center w-85">
+        Are you about to remove <b class="text-red-500">{account.name}!</b><br>
+        You can choose to keep his configuration in case you add it back later.
+        Data deletion is irreversible!
     </p>
     
-    <div class="flex w-full justify-end">
+    <div class="flex w-full justify-between items-center mt-6">
+        <Checkbox bind:checked={deleteData} text="Delete bot data"/>
+
         <Button isRed={true} text="Goodbye ;-;" onclick={async () => {
             deleteDialog.block();
-            await invoke("delete_account", {id: account.id});
+            await invoke("delete_account", {id: account.id, deleteData: deleteData});
             deleteDialog.unblock();
             deleteDialog.close();
             await refreshBots();

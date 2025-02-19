@@ -4,10 +4,22 @@
   } = $props();
 </script>
 
-<div class="loader">
+<div class={`
+  relative flex justify-center items-center
+  w-full h-full
+`}>
   {#each {length: 2} as _, index}
     <svg
-      class="{svgClass}"
+      class={`
+        ${svgClass}
+        m-auto absolute overflow-visible
+        animate-loading [stroke-dasharray:100]
+        [stroke-dashoffset:0] drop-shadow-[0px_3px_2px_rgba(0,0,0,1)]
+        ${index == 0
+          ? "w-full h-full stroke-[15px]"
+          : "w-[50%] h-[50%] stroke-[30px] [animation-direction:reverse]"
+        }
+      `}
       viewBox="0 0 200 173.20508075688772"
       ><path
         fill="transparent"
@@ -17,47 +29,3 @@
   {/each}
   
 </div>
-<!-- TODO: Convert to tailwind -->
-<style>
-  .loader {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    
-    width: 100%;
-    height: 100%;
-  }
-
-  svg {
-    margin: auto;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    overflow: visible;
-
-    animation: a 0.4s infinite linear;
-    stroke-width: 15px;
-    stroke-dasharray: 100;
-    stroke-dashoffset: 0;
-
-    filter: drop-shadow( 0px 3px 2px rgba(0, 0, 0, 1));
-  }
-
-  svg:nth-of-type(2) {
-    width: 50%;
-    height: 50%;
-    stroke-width: 30px;
-    stroke-dasharray: 100;
-    animation-direction: reverse;
-  }
-
-  @keyframes a {
-    0% {
-      stroke-dashoffset: 0;
-    }
-    100% {
-      stroke-dashoffset: 200;
-    }
-  }
-</style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import ErrorPopup from "../components/error_popup.svelte";
+    import ErrorPopup from "../components/error_popup/error_popup.svelte";
     import TitleBar from "../components/title_bar.svelte";
     import icon from "../assets/logobare.svg?raw";
 

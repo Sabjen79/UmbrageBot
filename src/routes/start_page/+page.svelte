@@ -8,18 +8,26 @@
   import BotCard from "./bot_card.svelte";
     import { redirect } from "@sveltejs/kit";
     import { goto } from "$app/navigation";
+    import Checkbox from "../../components/checkbox.svelte";
+    import ToggleSlider from "../../components/toggle_slider.svelte";
+    import ContextMenu from "../../components/context_menu/context_menu.svelte";
+    import ContextMenuItem from "../../components/context_menu/context_menu_item.svelte";
+    import { onDestroy } from "svelte";
 
   // svelte-ignore non_reactive_update
   let addBotDialog: AddBotDialog;
 
-  activeBot.subscribe(async (value) => {
+  let unsubscribe = activeBot.subscribe(async (value) => {
     if(value == null) return;
 
-    // Yes, loading time is artificially increased, fight me
-    await Promise.all([
-      invoke("start_bot", { token: value.token }),
-      new Promise(resolve => setTimeout(resolve, 1500))
-    ]);
+    try {
+      await invoke("start_bot", { token: value.token });
+    } catch(_) {
+      await goto("/start_page", { replaceState: true });
+      activeBot.set(null);
+      
+      return;
+    }
 
     botLoaded = true;
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -28,6 +36,10 @@
   })
 
   let botLoaded = $state(false);
+
+  onDestroy(() => {
+    unsubscribe();
+  })
 </script>
 
 <div
@@ -51,7 +63,8 @@
   </div>
 </div>
 
-<div class={`maindiv shadow-container
+<div 
+class={`maindiv shadow-container
   relative w-185 h-135 select-none
   border-1 rounded-2xl flex
   border-gray-950 bg-gray-900
@@ -59,15 +72,19 @@
   ${$activeBot != null ? "opacity-0 pointer-events-none -translate-y-2.5" : ""}
 `}>
   {#await refreshBots()}
+
     <div class="w-full h-full flex">
       <div class="w-10 h-10">
         <LoadingSpinner />
       </div>
     </div>
+
   {:then _}
+
     <div class="absolute mx-4.5 my-4.5 right-0 font-oversteer text-primary-500 text-2xl [text-shadow:#000_0_0_5px]">
       UMBRAGEbot
     </div>
+
     <div class="absolute mx-3 my-3">
       <Button text="New Bot" icon="add" onclick={() => {
         addBotDialog.open();
@@ -95,9 +112,9 @@
         {/each}
       {/if}
     </div>
+
   {/await}
 </div>
-
 
 <style>
   .maindiv {

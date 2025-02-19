@@ -11,16 +11,24 @@ macro_rules! log_info {
     }
 }
 
-// TODO: Implement error alerts
+pub fn emit_error(error: String) {
+    APP_HANDLE.get().unwrap().emit("error", error).unwrap();
+}
+
 macro_rules! log_error {
     ($($args: tt)*) => {
         let _ = crate::logging::write_log(format!($($args)*), "ERROR");
         println!($($args)*);
+
+        crate::logging::emit_error(format!($($args)*));
     }
 }
 
 pub(crate) use log_info;
 pub(crate) use log_error;
+use tauri::Emitter;
+
+use crate::APP_HANDLE;
 
 pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
     let dir_path = format!("{}{}", config_path, "\\logs");

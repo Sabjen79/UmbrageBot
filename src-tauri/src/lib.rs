@@ -27,6 +27,7 @@ pub fn run() {
             database::bot_accounts::delete_account,
 
             bot::start_bot,
+            bot::logout,
             config::bot_config::get_bot_config,
             config::bot_config::set_bot_config
         ])
@@ -44,7 +45,8 @@ pub fn run() {
                         app.save_window_state(StateFlags::all()).unwrap_or(());
 
                         tokio::spawn(async move {
-                            bot::shutdown().await;
+                            bot::logout().await;
+                            exit_app().await;
                         });
                     }
                     _ => {}
@@ -67,7 +69,7 @@ pub fn run() {
             APP_HANDLE.set(app.handle().to_owned()).unwrap();
             
             let config_path = format!(
-                "{}\\UmbrageBot",
+                "{}\\Umbrage Bot",
                 app.path().config_dir().unwrap().to_str().unwrap()
             );
 
@@ -81,4 +83,8 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+pub async fn exit_app() {
+    std::process::exit(0);
 }

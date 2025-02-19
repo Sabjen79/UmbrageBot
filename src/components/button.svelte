@@ -2,7 +2,7 @@
     import LoadingSpinner from "./loading_spinner.svelte";
 
     let {
-        text,
+        text = "",
         icon = "",
         isRed = false,
         disabled = $bindable(false),
@@ -19,21 +19,22 @@
 <button
     id="container"
     class={`
+        ${text == "" ? "w-10" : ""}
         relative flex items-center justify-center
         overflow-visible m-1 p-0 scheme-only-light
         text-primary-100 border-1 rounded-sm float-left duration-200
         ${hover && !waiting && !disabled ? "cursor-pointer" : "cursor-auto"}
 
         ${disabled ? "bg-gray-800" 
-        : hover && !waiting ? isRed ? "bg-red-800" : "bg-primary-600" 
-        : isRed ? "bg-red-700" : "bg-primary-500"}
+        : hover && !waiting ? isRed ? "bg-red-900" : "bg-primary-600" 
+        : isRed ? "bg-red-800" : "bg-primary-500"}
 
         ${pressed && !waiting ? "inset-shadow-[0_1px_5px_var(--color-primary-950)]" 
         : waiting ? "inset-shadow-[0_40px_5px_var(--color-primary-950)]" : ""}
         
         ${disabled ? "border-gray-900" 
-        : waiting ? isRed ? "border-red-700" : "border-primary-500" 
-        : isRed ? "border-red-800" : "border-primary-600"}
+        : waiting ? isRed ? "border-red-800" : "border-primary-500" 
+        : isRed ? "border-red-950" : "border-primary-600"}
     `}
     onmouseenter={() => {
         hover = true;
@@ -87,7 +88,7 @@
     >
 
         {#if icon != ""}
-            <span class="font-icons text-2xl mx-1 -ml-1">
+            <span class="font-icons text-2xl {text == "" ? "-ml-0.25" : "mx-1 -ml-1"}">
                 {icon}
             </span>
         {/if}

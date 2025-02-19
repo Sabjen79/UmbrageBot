@@ -26,7 +26,7 @@
             w-full h-full overflow-visible
         `}
         viewBox="50 0 250 173.20508075688772"
-        stroke={toggled ? "var(--color-gray-400)" : "var(--color-gray-600)"}
+        stroke={toggled ? "var(--color-gray-200)" : "var(--color-gray-400)"}
         stroke-width=10
     ><path
         style="transition: 0.2s;"

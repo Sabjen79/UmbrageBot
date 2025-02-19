@@ -82,7 +82,13 @@
             bind:value
             placeholder={placeholder}
             onfocusin={() => { focus = true }}
-            onfocusout={() => { focus = false; validationFunc() }}
+            onfocusout={() => { 
+                focus = false;
+                
+                if(!fastValidate) {
+                    validationFunc()
+                }
+            }}
             onmouseenter={() => { hover = true }}
             onmouseleave={() => { hover = false }}
             onkeypress={(event) => {

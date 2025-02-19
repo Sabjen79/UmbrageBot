@@ -85,13 +85,22 @@ pub async fn update_account_token(id: &str, new_token: &str) -> Result<(), Strin
     Ok(())
 }
 
-
-// TODO: Add option to delete data
 #[tauri::command]
-pub fn delete_account(id: &str) -> Result<(), String> {
+pub fn delete_account(id: &str, delete_data: bool) -> Result<(), String> {
     let conn = get_connection();
 
     conn.execute("DELETE FROM accounts WHERE id = ?1", (&id,))
+        .map_err(|err| err.to_string())?;
+
+    if !delete_data { return Ok(()) }
+
+    let path = crate::config::config_path(format!("\\config\\{}.json", id).as_str());
+
+    if std::fs::remove_file(&path).is_err() {
+        return Err("Failed to delete bot config file".to_string());
+    }
+
+    conn.execute("DELETE FROM usernames WHERE bot_id = ?1", (&id,))
         .map_err(|err| err.to_string())?;
 
     Ok(())

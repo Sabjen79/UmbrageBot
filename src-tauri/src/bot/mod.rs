@@ -1,82 +1,80 @@
-use std::sync::{Arc, OnceLock};
+use std::{error::Error, sync::{Arc, LazyLock, Mutex}};
 
 use event_handler::EventHandler;
-use serenity::{all::{GatewayIntents, Http}, Client};
+use serenity::{all::GatewayIntents, Client};
 use tokio::sync::Notify;
 
-use crate::{database::bot_accounts::BotAccount, logging::log_error};
+use crate::logging::{log_error, log_info};
 
 mod event_handler;
 mod account_manager;
 
-pub static ACTIVE_BOT: OnceLock<BotAccount> = OnceLock::new();
-static SHUTDOWN_NOTIFY: OnceLock<Notify> = OnceLock::new();
-static HTTP: OnceLock<Arc<Http>> = OnceLock::new();
-
-// pub async fn get_user() -> CurrentUser {
-//     let http = HTTP.get().unwrap();
-
-//     http.get_current_user().await.unwrap()
-// }
+pub static LOGIN_NOTIFY: LazyLock<Notify> = LazyLock::new(|| Notify::new());
+pub static LOGOUT_NOTIFY: LazyLock<Notify> = LazyLock::new(|| Notify::new());
 
 #[tauri::command]
-pub async fn start_bot(token: &str) -> Result<(), String> {
-    let account_res = crate::database::bot_accounts::get_bot_info(token).await;
-    
-    match account_res {
-        Ok(account) => {
-            ACTIVE_BOT.set(account).unwrap();
+pub async fn start_bot(token: String) -> Result<(), ()> {
+    let is_ok = Arc::new(Mutex::new(true));
+    let is_ok_clone = Arc::clone(&is_ok);
 
-            tokio::spawn(async {
-                start().await;
-            });
-            
-            Ok(())
-        },
-        Err(err) => {
-            Err(err.to_string())
+    tokio::spawn(async move {
+        match start(token.as_str()).await {
+            Ok(_) => {
+                // Idc about this case since it happens only on manual shutdown
+            },
+            Err(err) => {
+                log_error!("{}", err.to_string());
+
+                *is_ok_clone.lock().unwrap() = false;
+
+                LOGIN_NOTIFY.notify_waiters();
+            }
         }
+    });
+
+    LOGIN_NOTIFY.notified().await;
+
+    if *is_ok.lock().unwrap() { 
+        Ok(())
+    } else { 
+        Err(())
     }
 }
 
-// FIXME: Go back to homescreen when an error occurs
-async fn start() {
-    crate::config::initialize_bot_config().await;
+#[tauri::command]
+pub async fn logout() {
+    LOGOUT_NOTIFY.notify_waiters();
+}
 
+
+async fn start(token: &str) -> Result<(), Box<dyn Error>> {
     let mut client =
-        Client::builder(&ACTIVE_BOT.get().unwrap().token, GatewayIntents::all())
+        Client::builder(token, GatewayIntents::all())
             .event_handler(EventHandler)
-            .await
-            .expect("Err creating client");
+            .await?;
 
-    HTTP.set(client.http.clone()).unwrap();
+    let user = client.http.get_current_user().await
+        .map_err(|e| format!("Invalid bot token ({})", e))?;
+
+    crate::config::initialize_bot_config(&user.id.to_string()).await;
 
     // account_manager::initialize();
 
-    SHUTDOWN_NOTIFY.set(Notify::new()).unwrap();
-
     let shard_manager = client.shard_manager.clone();
 
-    tokio::spawn(async move {
-        SHUTDOWN_NOTIFY.get().unwrap().notified().await;
+    let logout_handle = tokio::spawn(async move {
+        LOGOUT_NOTIFY.notified().await;
         
         shard_manager.shutdown_all().await;
 
-        std::process::exit(0);
+        log_info!("Bot logged out successfully");
     });
 
     if let Err(why) = client.start().await {
-        log_error!("Discord client error: {why:?}");
+        return Err(Box::new(why));
     }
-}
 
-pub async fn shutdown() {
-    match SHUTDOWN_NOTIFY.get() {
-        Some(notify) => {
-            notify.notify_one();
-        },
-        None => {
-            std::process::exit(0);
-        }
-    }
+    logout_handle.abort();
+
+    Ok(())
 }

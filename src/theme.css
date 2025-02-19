@@ -51,6 +51,17 @@
     --font-sourcesans: SourceSans;
     --font-oversteer: UnsteadyOversteer;
     --font-icons: Icons;
+
+    --animate-loading: loading 0.4s infinite linear;
+
+    @keyframes loading {
+        0% {
+            stroke-dashoffset: 0;
+        }
+        100% {
+            stroke-dashoffset: 200;
+        }
+    }
 }
 
 .font-icons {

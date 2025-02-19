@@ -1,4 +1,4 @@
-use std::{error::Error, fs::{self, read_to_string, File}, sync::{LazyLock, OnceLock}};
+use std::{error::Error, fs::{self, read_to_string, File}, sync::{LazyLock, Mutex}};
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 use tokio::sync::{RwLock, RwLockReadGuard};
@@ -23,15 +23,19 @@ pub struct BotConfig {
     username_timer_date: u32
 }
 
-static CONFIG: LazyLock<RwLock<BotConfig>> = LazyLock::new(|| 
-    RwLock::new(BotConfig {
-        username_timer_enabled: Default::default(),
-        username_timer_interval: default_u32::<5>(),
-        username_timer_date: Default::default(),
-    })
-);
+impl BotConfig {
+    pub fn new() -> Self {
+        Self { 
+            username_timer_enabled: Default::default(),
+            username_timer_interval: default_u32::<5>(),
+            username_timer_date: Default::default(),
+        }
+    }
+}
 
-static CONFIG_PATH: OnceLock<String> = OnceLock::new();
+static CONFIG: LazyLock<RwLock<BotConfig>> = LazyLock::new(|| RwLock::new(BotConfig::new()));
+
+static CONFIG_PATH: Mutex<String> = Mutex::new(String::new());
 
 //==========================================================================//
 // Commands for frontend. Since they inevitably clone responses, the backend
@@ -69,40 +73,36 @@ where
     Ok(())
 }
 
-pub(super) async fn initialize() -> Result<(), Box<dyn Error>> {
-    match crate::bot::ACTIVE_BOT.get() {
-        Some(account) => {
-            CONFIG_PATH.set(super::config_path(format!("//config//{}.json", account.id).as_str()))?;
-        }
-        None => {
-            return Err("No active bot".into())
-        }
-    }
+pub(super) async fn initialize(id: &str) -> Result<(), Box<dyn Error>> {
+    let path = super::config_path(format!("\\config\\{}.json", id).as_str());
+    *CONFIG_PATH.lock().unwrap() = path.clone();
 
     let json;
 
-    match read_to_string(CONFIG_PATH.get().unwrap()) {
+    match read_to_string(path) {
         Ok(str) => {
             json = str;
 
             let config: BotConfig = serde_json::from_str(json.as_str())?;
 
             *CONFIG.write().await = config;
+
+            APP_HANDLE.get().unwrap().emit("bot_config_update", get_config().await.clone())?;
         }
         Err(_) => {
             log_info!("Bot configuration could not be found! Creating new one");
 
-            let dir_path = super::config_path("//config");
+            *CONFIG.write().await = BotConfig::new();
+
+            APP_HANDLE.get().unwrap().emit("bot_config_update", get_config().await.clone())?;
+
+            let dir_path = super::config_path("\\config");
 
             if !fs::exists(&dir_path)? {
                 fs::create_dir(&dir_path)?;
             }
 
             save_config().await?;
-
-            log_info!("Loaded config");
-            
-            return Ok(());
         }
     };
 
@@ -110,7 +110,7 @@ pub(super) async fn initialize() -> Result<(), Box<dyn Error>> {
 }
 
 async fn save_config() -> Result<(), Box<dyn Error>> {
-    let mut file = File::create(CONFIG_PATH.get().unwrap())?;
+    let mut file = File::create(&*CONFIG_PATH.lock().unwrap())?;
 
     let json = serde_json::to_string_pretty(&*CONFIG.read().await)?;
     file.write_all(json.as_bytes())?;
