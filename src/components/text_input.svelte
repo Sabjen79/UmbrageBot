@@ -1,12 +1,18 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
-
     let {
         value = $bindable(""),
         validated = $bindable(false),
         placeholder = "Input Text",
-        validationType = "",
-        fastValidate = false
+        validation: validation,
+        fastValidation = false
+    }: {
+        value: string,
+        validated?: boolean,
+        placeholder?: string,
+        /** Return null for success, or error string */ 
+        validation?: () => Promise<string | null>,
+        /** If true, validation is made every change */ 
+        fastValidation?: boolean
     } = $props();
 
     let hover = $state(false);
@@ -14,42 +20,25 @@
     let waiting = $state(false);
 
     let firstValidation = $state(true);
-    let validationId = 0;
-    let lastError = $state("");
+    let lastError: string | null = $state(null);
     let errorVisible = $state(false);
 
-    type InputValidationError = {
-        validationId: number;
-        message: string;
-    };
-
-    async function validationFunc() {
-        if(validationType == "") return;
+    export async function fullValidation() {
+        if(!validation) return;
 
         firstValidation = false;
-        waiting = true;
-        validated = false;
-        validationId = (validationId + 1) % 127;
+        errorVisible = false;
+        lastError = null;
 
-        await invoke('validate_input', {
-            message: value,
-            validationType: validationType,
-            validationId: validationId
-        }).then((value) => {
-            if(value == validationId) {
-                waiting = false;
-                validated = true;
-            }
-        }).catch((error: InputValidationError) => {
-            if(error.validationId == validationId) {
-                waiting = false;
-                validated = false;
-                lastError = error.message;
-            }
-        });
+        waiting = true;
+        let result = await validation();
+        waiting = false;
+
+        lastError = result;
+        validated = (result == null);
     }
 
-    if(value == "" && validationType != "") {
+    if(value == "" && validation != null) {
         validated = false;
     }
 </script>
@@ -65,8 +54,8 @@
             bg-gray-950 border-none rounded-md ring-1
             w-full h-9.5 p-2 m-0 
             duration-200 ease-out
-            ${!firstValidation && !validated ? "ring-red-700"
-            : waiting ? "ring-gray-400"
+            ${waiting ? "ring-gray-600"
+            : !validated && !firstValidation ? "ring-red-700"
             : focus ? "ring-primary-500" 
             : hover ? "ring-gray-400" 
             : "ring-gray-700"}
@@ -82,11 +71,11 @@
             bind:value
             placeholder={placeholder}
             onfocusin={() => { focus = true }}
-            onfocusout={() => { 
+            onfocusout={async () => { 
                 focus = false;
                 
-                if(!fastValidate) {
-                    validationFunc()
+                if(!fastValidation) {
+                    await fullValidation();
                 }
             }}
             onmouseenter={() => { hover = true }}
@@ -94,7 +83,7 @@
             onkeypress={(event) => {
                 if(event.key == 'Enter') document.querySelector("input")?.blur();
             }}
-            oninput={fastValidate ? validationFunc : null}
+            oninput={fastValidation ? fullValidation : null}
         />
 
         <div
@@ -102,18 +91,18 @@
                 absolute h-full w-7.5 text-red-700 right-2
                 flex justify-end items-center pointer-events-none
                 duration-200 ease-in-out overflow-visible
-                ${!firstValidation && !validated ? "opacity-100" : "opacity-0"}
+                ${!validated && !firstValidation && !waiting ? "opacity-100" : "opacity-0"}
         `}>
 
             <button
                 onmouseenter={() => {
-                    if(!firstValidation && !validated)
+                    if(!validated && !firstValidation && !waiting)
                         errorVisible = true
                 }}
                 onmouseleave={() => { errorVisible = false }}
                 class={`
                     font-icons text-2xl ![font-variation-settings:'FILL'_1,'wght'_400,'GRAD'_0,'opsz'_24]
-                    pb-0.5 ${!firstValidation && !validated ? "pointer-events-auto" : "pointer-events-none"}
+                    pb-0.5 ${!validated && !firstValidation ? "pointer-events-auto" : "pointer-events-none"}
                     bg-gray-950
                 `}
             >

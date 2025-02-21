@@ -37,10 +37,19 @@
 
         <TextInput 
             bind:value={token} 
-            bind:validated={tokenValidated} 
-            placeholder="Token" 
-            validationType="token"
-            fastValidate={true}
+            placeholder="Token"
+            fastValidation={true}
+            validation={async () =>  {
+                tokenValidated = false;
+
+                return await invoke('validate_token', {token: token}).then(() => {
+                    tokenValidated = true;
+                    return null;
+                }).catch((error) => {
+                    tokenValidated = false;
+                    return error;
+                });
+            }} 
         />
 
         <div class="w-full flex justify-end mt-3">

@@ -6,7 +6,6 @@ use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 mod config;
 mod database;
 mod logging;
-mod input_validator;
 mod bot;
 
 pub static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
@@ -20,16 +19,18 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            input_validator::validate_input,
+            database::bot_accounts::validate_token,
             database::bot_accounts::get_all_accounts,
             database::bot_accounts::insert_account,
             database::bot_accounts::update_account_token,
             database::bot_accounts::delete_account,
 
+            config::bot_config::get_bot_config,
+            config::bot_config::set_bot_config,
+            
             bot::start_bot,
             bot::logout,
-            config::bot_config::get_bot_config,
-            config::bot_config::set_bot_config
+            bot::account_manager::change_username
         ])
         .setup(|app| {
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;

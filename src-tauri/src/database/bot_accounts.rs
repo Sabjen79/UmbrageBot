@@ -11,6 +11,32 @@ pub struct BotAccount {
 }
 
 #[tauri::command]
+pub async fn validate_token(token: &str) -> Result<(), String> {
+    let _ = serenity::all::validate_token(token)
+        .map_err(|err| err.to_string())?;
+
+    let client = Client::builder(token, GatewayIntents::all())
+        .status(serenity::all::OnlineStatus::Invisible)
+        .await
+        .map_err(|err| err.to_string())?;
+
+    let _ = client
+        .http
+        .get_current_user()
+        .await
+        .map_err(|_| "The provided token was invalid")?;
+
+    let bots = get_all_accounts()?;
+    for bot in bots {
+        if bot.token == token {
+            return Err("This bot is already added".into());
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
 pub fn get_all_accounts() -> Result<Vec<BotAccount>, String> {
     let conn = get_connection();
 

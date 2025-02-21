@@ -6,6 +6,7 @@
     import Divider from "../../../components/divider.svelte";
     import { onDestroy } from "svelte";
     import TextInput from "../../../components/text_input.svelte";
+    import { emit } from "@tauri-apps/api/event";
 
     let a = $state(false);
 
@@ -15,28 +16,35 @@
         }
     });
 
+    let value = $state("");
+
     onDestroy(() => {
         usernameSubscriber();
     });
 </script>
 
-<div class="w-full overflow-hidden pb-1">
-    <SettingsRow
-        title="Multiple Usernames"
-        description="Whether the bot will change his username after a period of time."
-    >
-        <ToggleSlider bind:toggled={$botConfig.usernameTimerEnabled} />
-    </SettingsRow>
+<div class="w-full pb-1">
 
     <SettingsRow
         title="Username"
-        description="Bot's display name. Won't replace nicknames."
+        description={`Be wary that Discord will not let you spam change your nickname.`}
         visible={!$botConfig.usernameTimerEnabled}
     >
-        <div class="w-50">
-            <TextInput 
+        <div class="w-60">
+            <TextInput
+                bind:value={value}
                 placeholder="Username" 
-                validationType="token"
+                validation={async () => {
+                    if(value == "") {
+                        return "Username cannot be empty!"
+                    }
+
+                    return invoke('change_username', {username: value}).then(() => {
+                        return null;
+                    }).catch((err) => {
+                        return err;
+                    })
+                }}
             />
         </div>
     </SettingsRow>
