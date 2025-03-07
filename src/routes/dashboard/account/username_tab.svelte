@@ -2,11 +2,12 @@
     import { invoke } from "@tauri-apps/api/core";
     import SettingsRow from "../../../components/settings_row.svelte";
     import ToggleSlider from "../../../components/toggle_slider.svelte";
-    import { botConfig } from "../bot_config";
     import Divider from "../../../components/divider.svelte";
     import { onDestroy } from "svelte";
     import TextInput from "../../../components/text_input.svelte";
     import { emit } from "@tauri-apps/api/event";
+    import { botConfig } from "../../../stores/bot_config_store";
+    import { botProfile } from "../../../stores/bot_profile_store";
 
     let a = $state(false);
 
@@ -16,7 +17,7 @@
         }
     });
 
-    let value = $state("");
+    let value = $state($botProfile.username);
 
     onDestroy(() => {
         usernameSubscriber();
@@ -39,7 +40,7 @@
                         return "Username cannot be empty!"
                     }
 
-                    return invoke('change_username', {username: value}).then(() => {
+                    return await invoke('change_username', {username: value}).then(() => {
                         return null;
                     }).catch((err) => {
                         return err;

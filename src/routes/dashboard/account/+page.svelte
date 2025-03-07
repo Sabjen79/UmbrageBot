@@ -3,10 +3,11 @@
     import Button from "../../../components/button.svelte";
     import Divider from "../../../components/divider.svelte";
 import SettingsRow from "../../../components/settings_row.svelte";
-    import { activeBot } from "../../start_page/bot_accounts";
+    import { selectedBot } from "../../../stores/bot_accounts_store";
     import TabSelector from "./tab_selector.svelte";
     import UsernameTab from "./username_tab.svelte";
     import { goto } from "$app/navigation";
+    import { botProfile } from "../../../stores/bot_profile_store";
 
     let tabIndex = 0;
 </script>
@@ -24,8 +25,8 @@ import SettingsRow from "../../../components/settings_row.svelte";
         `}
     >
         <img class="pointer-events-none" 
-            alt={$activeBot?.name} 
-            src={$activeBot?.avatarUrl}
+            alt={$botProfile.username} 
+            src={$selectedBot?.avatarUrl}
         />
     </div>
 
@@ -35,7 +36,7 @@ import SettingsRow from "../../../components/settings_row.svelte";
         `}
     >
         <p class="font-semibold text-3xl">
-            {$activeBot?.name}
+            {$botProfile.username}
         </p>
     </div>
 
@@ -50,7 +51,7 @@ import SettingsRow from "../../../components/settings_row.svelte";
             onclick={async () => {
                 await invoke("logout");
 
-                $activeBot = null;
+                $selectedBot = null;
                 await goto("/start_page");
             }}
         />

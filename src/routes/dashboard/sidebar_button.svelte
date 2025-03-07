@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import type { BotAccount } from "../start_page/bot_accounts";
+    import type { BotAccount } from "../../stores/bot_accounts_store";
     import { page } from '$app/state';  
   
 

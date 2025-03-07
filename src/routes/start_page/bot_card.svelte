@@ -5,9 +5,10 @@
     import ContextMenuItem from "../../components/context_menu/context_menu_item.svelte";
     import Dialog from "../../components/dialog.svelte";
     import IconButton from "../../components/icon_button.svelte";
-    import { activeBot, refreshBots, type BotAccount } from "./bot_accounts";
+    import { selectedBot, refreshBots, type BotAccount } from "../../stores/bot_accounts_store";
     import AddBotDialog from "./add_bot_dialog.svelte";
     import Checkbox from "../../components/checkbox.svelte";
+    import { botProfile } from "../../stores/bot_profile_store";
 
     let {
         account,
@@ -51,7 +52,8 @@
         onmouseup={(event) => { 
             if(event.button != 0) return;
             
-            $activeBot = account;
+            $selectedBot = account;
+            $botProfile; // Reference here to start the listener
         }}
         class={`
             flex flex-col items-center

@@ -4,27 +4,22 @@
   import { invoke } from "@tauri-apps/api/core";
   import LoadingSpinner from "../../components/loading_spinner.svelte";
   import AddBotDialog from "./add_bot_dialog.svelte";
-  import { activeBot, allBots, refreshBots, type BotAccount } from "./bot_accounts";
+  import { selectedBot, allBots, refreshBots, type BotAccount } from "../../stores/bot_accounts_store";
   import BotCard from "./bot_card.svelte";
-    import { redirect } from "@sveltejs/kit";
-    import { goto } from "$app/navigation";
-    import Checkbox from "../../components/checkbox.svelte";
-    import ToggleSlider from "../../components/toggle_slider.svelte";
-    import ContextMenu from "../../components/context_menu/context_menu.svelte";
-    import ContextMenuItem from "../../components/context_menu/context_menu_item.svelte";
-    import { onDestroy } from "svelte";
+  import { goto } from "$app/navigation";
+  import { onDestroy } from "svelte";
 
   // svelte-ignore non_reactive_update
   let addBotDialog: AddBotDialog;
 
-  let unsubscribe = activeBot.subscribe(async (value) => {
+  let unsubscribe = selectedBot.subscribe(async (value) => {
     if(value == null) return;
 
     try {
       await invoke("start_bot", { token: value.token });
     } catch(_) {
       await goto("/start_page", { replaceState: true });
-      activeBot.set(null);
+      selectedBot.set(null);
       
       return;
     }
@@ -52,14 +47,14 @@
     ? "left-14 xl:left-37 right-2 inset-y-2 top-8" 
     : "inset-x-[calc(50%-120px)] inset-y-[calc(50%-40px)]"}
 
-    ${$activeBot != null ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2.5"}
+    ${$selectedBot != null ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2.5"}
   `}
 >
   <div class="w-20 h-20 p-5 duration-200 {botLoaded ? "opacity-0" : "opacity-100"}">
     <LoadingSpinner />
   </div>
   <div class="flex-1 text-center pr-5 duration-200 {botLoaded ? "opacity-0" : "opacity-100"}">
-    <b>{$activeBot?.name}</b><br> is waking up...
+    <b>{$selectedBot?.name}</b><br> is waking up...
   </div>
 </div>
 
@@ -69,7 +64,7 @@ class={`maindiv shadow-container
   border-1 rounded-2xl flex
   border-gray-950 bg-gray-900
   duration-300 ease-in-out
-  ${$activeBot != null ? "opacity-0 pointer-events-none -translate-y-2.5" : ""}
+  ${$selectedBot != null ? "opacity-0 pointer-events-none -translate-y-2.5" : ""}
 `}>
   {#await refreshBots()}
 

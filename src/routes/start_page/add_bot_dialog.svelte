@@ -5,7 +5,7 @@
     import TextButton from "../../components/text_button.svelte";
     import TextInput from "../../components/text_input.svelte";
     import { open as openExternal } from "@tauri-apps/plugin-shell";
-    import { refreshBots, type BotAccount } from "./bot_accounts";
+    import { refreshBots, type BotAccount } from "../../stores/bot_accounts_store";
 
     let { 
         botAccount = null // Used for update mode

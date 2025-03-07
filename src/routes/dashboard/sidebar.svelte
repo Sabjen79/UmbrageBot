@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { activeBot } from "../start_page/bot_accounts";
+    import { selectedBot } from "../../stores/bot_accounts_store";
     import SidebarButton from "./sidebar_button.svelte";
 </script>
 

@@ -1,5 +1,5 @@
 use super::get_connection;
-use serenity::prelude::*;
+use serenity::{all::CurrentUser, prelude::*};
 
 #[derive(serde::Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -132,16 +132,16 @@ pub fn delete_account(id: &str, delete_data: bool) -> Result<(), String> {
     Ok(())
 }
 
-// pub fn update_account_info(user: &CurrentUserRef) {
-//     let conn = database::get_connection();
+pub fn update_account_info(user: &CurrentUser) {
+    let conn = get_connection();
 
-//     conn.execute("
-//             UPDATE accounts
-//             SET name = ?1, avatar_url = ?2
-//             WHERE id = ?3
-//         ", (user.name.clone(), user.avatar_url().unwrap_or("".to_owned()), user.id.to_string())
-//     ).unwrap();
-// }
+    conn.execute("
+            UPDATE accounts
+            SET name = ?1, avatar_url = ?2
+            WHERE id = ?3
+        ", (user.name.clone(), user.avatar_url().unwrap_or("".to_owned()), user.id.to_string())
+    ).unwrap();
+}
 
 pub async fn get_bot_info(token: &str) -> Result<BotAccount, String> {
     let client = Client::builder(token, GatewayIntents::all())

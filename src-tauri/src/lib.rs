@@ -8,7 +8,7 @@ mod database;
 mod logging;
 mod bot;
 
-pub static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
+static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -84,6 +84,10 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+pub fn get_app_handle() -> &'static AppHandle {
+    return APP_HANDLE.get().unwrap();
 }
 
 pub async fn exit_app() {

@@ -16,4 +16,4 @@ export async function refreshBots() {
     });
 }
 
-export let activeBot = writable<BotAccount | null>(null);
+export let selectedBot = writable<BotAccount | null>(null);

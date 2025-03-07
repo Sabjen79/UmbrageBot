@@ -36,6 +36,8 @@ pub(super) fn initialize() {
     log_info!("{}", "Database Initialized");
 }
 
+
+// TODO: Keep connection open
 pub(in crate::database) fn get_connection() -> Connection {
     Connection::open(DB_PATH.get().unwrap()).unwrap()
 }

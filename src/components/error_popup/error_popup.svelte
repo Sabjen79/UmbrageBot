@@ -1,10 +1,7 @@
 <script lang="ts">
-    import { error } from "@sveltejs/kit";
     import { listen } from "@tauri-apps/api/event";
-    import { StateFlags } from "@tauri-apps/plugin-window-state";
     import { onMount } from "svelte";
     import ErrorItem from "./error_item.svelte";
-    import { activeBot } from "../../routes/start_page/bot_accounts";
     import { page } from "$app/state";
 
     type Error = {
