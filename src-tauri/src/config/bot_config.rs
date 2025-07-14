@@ -1,9 +1,8 @@
-use std::{error::Error, fs::{self, read_to_string, File}, sync::{LazyLock, Mutex}};
+use std::{error::Error, fs::{read_to_string, File}};
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
-use tokio::sync::{RwLock, RwLockReadGuard};
 use std::io::prelude::*;
-use crate::{logging::log_info, APP_HANDLE};
+use crate::{config::AppConfiguration, logging::{log_error, log_info}, app_handle};
 
 pub const fn default_u32<const V: u32>() -> u32 {
     V
@@ -25,7 +24,7 @@ pub struct BotConfig {
 
 impl BotConfig {
     pub fn new() -> Self {
-        Self { 
+        Self {
             username_timer_enabled: Default::default(),
             username_timer_interval: default_u32::<5>(),
             username_timer_date: Default::default(),
@@ -33,87 +32,93 @@ impl BotConfig {
     }
 }
 
-static CONFIG: LazyLock<RwLock<BotConfig>> = LazyLock::new(|| RwLock::new(BotConfig::new()));
+impl AppConfiguration {
+    pub async fn initialize_bot_config(&self, id: String) {
+        let path = format!("{}\\config\\{}.json", self.config_path, id);
 
-static CONFIG_PATH: Mutex<String> = Mutex::new(String::new());
+        let mut path_lock = self.bot_config_path.lock().await;
+        *path_lock = Some(path.clone());
+        drop(path_lock);
 
-//==========================================================================//
-// Commands for frontend. Since they inevitably clone responses, the backend
-// should only call get_config() and edit_config() instead
-//==========================================================================//
-
-#[tauri::command]
-pub async fn get_bot_config() -> Result<BotConfig, String> {
-    Ok(get_config().await.clone())
-}
-
-#[tauri::command]
-pub async fn set_bot_config(config: BotConfig) -> Result<(), String> {
-    edit_config(|c| {
-        config.clone_into(c);
-    }).await.map_err(|err| err.to_string())?;
-    Ok(())
-}
-
-//==========================================================================//
-
-pub async fn get_config() -> RwLockReadGuard<'static, BotConfig> {
-    CONFIG.read().await
-}
-
-pub async fn edit_config<F>(callback: F) -> Result<(), Box<dyn Error>>
-where
-    F: FnOnce(&mut BotConfig),
-{
-    callback(&mut *CONFIG.write().await);
-
-    save_config().await?;
-
-    APP_HANDLE.get().unwrap().emit("bot_config_update", get_config().await.clone())?;
-    Ok(())
-}
-
-pub(super) async fn initialize(id: &str) -> Result<(), Box<dyn Error>> {
-    let path = super::config_path(format!("\\config\\{}.json", id).as_str());
-    *CONFIG_PATH.lock().unwrap() = path.clone();
-
-    let json;
-
-    match read_to_string(path) {
-        Ok(str) => {
-            json = str;
-
-            let config: BotConfig = serde_json::from_str(json.as_str())?;
-
-            *CONFIG.write().await = config;
-
-            APP_HANDLE.get().unwrap().emit("bot_config_update", get_config().await.clone())?;
-        }
-        Err(_) => {
-            log_info!("Bot configuration could not be found! Creating new one");
-
-            *CONFIG.write().await = BotConfig::new();
-
-            APP_HANDLE.get().unwrap().emit("bot_config_update", get_config().await.clone())?;
-
-            let dir_path = super::config_path("\\config");
-
-            if !fs::exists(&dir_path)? {
-                fs::create_dir(&dir_path)?;
+        // Avoid holding any lock across await points
+        let config: BotConfig = match read_to_string(&path) {
+            Ok(str) => {
+                match serde_json::from_str(str.as_str()) {
+                    Ok(cfg) => cfg,
+                    Err(_) => {
+                        log_info!("Bot configuration is invalid! Creating new one");
+                        self.new_config().await
+                    }
+                }
             }
+            Err(_) => {
+                log_info!("Bot configuration could not be found! Creating new one");
+                self.new_config().await
+            }
+        };
 
-            save_config().await?;
+        if let Err(why) = app_handle().emit("bot_config_update", config.clone()) {
+            log_error!("Error emitting bot_config_update: {}", why.to_string());
+        };
+
+        println!("HELO lock");
+
+        let mut config_lock = self.bot_config.lock().await;
+        *config_lock = config;
+
+        println!("HELO unlock");
+    }
+
+    async fn new_config(&self) -> BotConfig {
+        let config = BotConfig::new();
+
+        if let Err(why) = self.save_config().await {
+            log_error!("Cannot save config: {}", why.to_string());
+        };
+
+        return config;
+    }
+
+    async fn save_config(&self) -> Result<(), Box<dyn Error>> {
+        let path_opt = {
+            let path_lock = self.bot_config_path.lock().await;
+            path_lock.clone()
+        };
+
+        if let Some(path) = path_opt {
+            let config_json = {
+                let config = self.bot_config.lock().await;
+                serde_json::to_string_pretty(&*config)?
+            };
+
+            let mut file = File::create(path)?;
+            file.write_all(config_json.as_bytes())?;
+        } else {
+            log_error!("Bot Config Path is not initialized");
         }
-    };
 
-    Ok(())
-}
+        Ok(())
+    }
 
-async fn save_config() -> Result<(), Box<dyn Error>> {
-    let mut file = File::create(&*CONFIG_PATH.lock().unwrap())?;
+    pub async fn edit_config<F>(&self, callback: F) -> Result<(), Box<dyn Error + '_>>
+    where
+        F: FnOnce(&mut BotConfig),
+    {
+        let mut config_lock = self.bot_config.lock().await;
 
-    let json = serde_json::to_string_pretty(&*CONFIG.read().await)?;
-    file.write_all(json.as_bytes())?;
+        callback(&mut *config_lock);
 
-    Ok(())
+        app_handle().emit("bot_config_update", config_lock.clone())?;
+
+        drop(config_lock);
+
+        match self.save_config().await {
+            Ok(()) => {}
+            Err(err) => {
+                log_error!("Cannot save config: {}", err.to_string());
+            }
+        }
+
+        Ok(())
+    }
 }

@@ -1,108 +1,111 @@
-use std::{error::Error, sync::{Arc, LazyLock, Mutex, RwLock}};
+use std::{error::Error, sync::Arc};
 
 use event_handler::EventHandler;
 use serenity::{all::{GatewayIntents, Http}, Client};
-use tauri::Listener;
-use tokio::sync::Notify;
+use tauri::{Listener, Manager, State};
+use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard, Notify};
 
-use crate::{logging::{log_error, log_info}, APP_HANDLE};
+use crate::{app_handle, config::app_config, database::database, logging::{log_error, log_info}};
 
 mod event_handler;
 pub mod account_manager;
+pub mod commands;
 
-pub static LOGIN_NOTIFY: LazyLock<Notify> = LazyLock::new(|| Notify::new());
-pub static LOGOUT_NOTIFY: LazyLock<Notify> = LazyLock::new(|| Notify::new());
-pub static LISTENERS: Mutex<Vec<u32>> = Mutex::new(Vec::new());
+pub struct Bot {
+    login_notify: Arc<Notify>,
+    shutdown_notify: Arc<Notify>,
+    tauri_event_listeners: Arc<Mutex<Vec<u32>>>,
+    http: Arc<Http>
+}
 
-static HTTP: RwLock<Option<Arc<Http>>> = RwLock::new(None);
+pub type BotState = Mutex<Option<Bot>>;
 
-#[tauri::command]
-pub async fn start_bot(token: String) -> Result<(), ()> {
-    let is_ok = Arc::new(Mutex::new(true));
-    let is_ok_clone = Arc::clone(&is_ok);
+impl Bot {
+    pub async fn start_bot(token: &str) -> Result<Bot, Box<dyn Error>> {
+        let mut client =
+            Client::builder(token, GatewayIntents::all())
+                .event_handler(EventHandler)
+                .await?;
+        
+        let user_res = client.http.get_current_user().await;
 
-    tokio::spawn(async move {
-        match start(token.as_str()).await {
-            Ok(_) => {
-                // Idc about this case since it happens only on manual shutdown
-            },
-            Err(err) => {
-                log_error!("{}", err.to_string());
-
-                *is_ok_clone.lock().unwrap() = false;
-
-                LOGIN_NOTIFY.notify_waiters();
+        match user_res {
+            Ok(user) => {
+                app_config().initialize_bot_config(user.id.to_string()).await;
+                
+                database().update_account_info(&user).await;
+            }
+            Err(_) => {
+                return Err("Invalid Bot Token".into());
             }
         }
-    });
 
-    LOGIN_NOTIFY.notified().await;
+        let manager = client.shard_manager.clone();
 
-    LISTENERS.lock().unwrap().clear();
+        let _self = Self {
+            login_notify: Arc::new(Notify::new()),
+            shutdown_notify: Arc::new(Notify::new()), 
+            tauri_event_listeners: Arc::new(Mutex::new(Vec::new())), 
+            http: client.http.clone()
+        };
 
-    if *is_ok.lock().unwrap() { 
-        Ok(())
-    } else { 
-        Err(())
+        // Shutdown Thread
+        let manager_clone = manager.clone();
+        let shutdown_notify = _self.shutdown_notify.clone();
+
+        let shutdown_handle = tokio::spawn(async move {
+            // TODO: Convert notifiers to tauri events
+            shutdown_notify.notified().await;
+            
+            manager_clone.shutdown_all().await;
+
+            log_info!("Bot shutdown successfully");
+        });
+
+        // Bot Thread
+        let listeners = _self.tauri_event_listeners.clone();
+
+        tokio::spawn(async move {
+            // This function runs continously until the bot is closed
+            if let Err(why) = client.start().await { 
+                log_error!("{}", why.to_string())
+            }
+
+            shutdown_handle.abort();
+
+            for event in &*listeners.lock().await {
+                app_handle().unlisten(*event);
+            }
+        });
+
+        Ok(_self)
+    }
+
+    pub fn shutdown(&self) {
+        self.shutdown_notify.notify_waiters();
     }
 }
 
-#[tauri::command]
-pub async fn logout() {
-    LOGOUT_NOTIFY.notify_waiters();
+
+pub fn active_bot() -> State<'static, BotState> {
+    return app_handle().state::<BotState>();
 }
 
-async fn start(token: &str) -> Result<(), Box<dyn Error>> {
-    let mut client =
-        Client::builder(token, GatewayIntents::all())
-            .event_handler(EventHandler)
-            .await?;
-
-    *HTTP.write().unwrap() = Some(client.http.clone());
-
-    let user = client.http.get_current_user().await
-        .map_err(|e| format!("Invalid bot token ({})", e))?;
-
-
-    let shard_manager = client.shard_manager.clone();
-
-    let logout_handle = tokio::spawn(async move {
-        LOGOUT_NOTIFY.notified().await;
-        
-        shard_manager.shutdown_all().await;
-
-        log_info!("Bot logged out successfully");
-    });
-
-    crate::config::initialize_bot_config(&user.id.to_string()).await;
-
-    account_manager::initialize().await;
-
-    if let Err(why) = client.start().await {
-        return Err(Box::new(why));
-    }
-
-    logout_handle.abort();
-
-    for event in &*LISTENERS.lock().unwrap() {
-        APP_HANDLE.get().unwrap().unlisten(*event);
-    }
-
-    *HTTP.write().unwrap() = None;
-
-    Ok(())
+pub trait BotStateExt {
+    async fn lock_and_get(&self) -> MappedMutexGuard<'_, Bot>;
 }
 
-/// This function should be used only by listeners that are canceled when the
-/// client object no longer exists
-fn get_http() -> Arc<Http> {
-    match &*HTTP.read().unwrap() {
-        Some(arc_http) => {
-            arc_http.clone()
+impl BotStateExt for BotState {
+    /// Converts the `MutexGuard<'_, Option<Bot>>` into `MappedMutexGuard<'_, Bot>`.
+    /// Will panic if there is no active bot
+    async fn lock_and_get(&self) -> MappedMutexGuard<'_, Bot> {
+        let guard = self.lock().await;
+
+        if guard.is_none() {
+            panic!("There is no bot active")
         }
-        None => {
-            panic!("Client is not initialized!");
-        }
+
+        MutexGuard::map(guard, |opt| opt.as_mut().unwrap())
     }
 }
 

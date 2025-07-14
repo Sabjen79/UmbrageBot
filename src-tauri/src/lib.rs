@@ -2,12 +2,16 @@ use std::sync::OnceLock;
 
 use tauri::{menu::{Menu, MenuItem}, tray::{MouseButton, TrayIconBuilder, TrayIconEvent}, AppHandle, Manager};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+use tokio::sync::Mutex;
+
+use crate::{bot::Bot, config::AppConfiguration, database::Database};
 
 mod config;
 mod database;
 mod logging;
 mod bot;
 
+/// Use `app_handle()` instead!
 static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -19,18 +23,18 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            database::bot_accounts::validate_token,
-            database::bot_accounts::get_all_accounts,
-            database::bot_accounts::insert_account,
-            database::bot_accounts::update_account_token,
-            database::bot_accounts::delete_account,
+            database::commands::db_validate_token,
+            database::commands::db_get_all_accounts,
+            database::commands::db_insert_account,
+            database::commands::db_update_account,
+            database::commands::db_delete_account,
 
-            config::bot_config::get_bot_config,
-            config::bot_config::set_bot_config,
+            config::commands::get_bot_config,
+            config::commands::set_bot_config,
             
-            bot::start_bot,
-            bot::logout,
-            bot::account_manager::change_username
+            bot::commands::start_bot,
+            bot::commands::shutdown_bot,
+            //bot::account_manager::account_username::change_username
         ])
         .setup(|app| {
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -46,7 +50,7 @@ pub fn run() {
                         app.save_window_state(StateFlags::all()).unwrap_or(());
 
                         tokio::spawn(async move {
-                            bot::logout().await;
+                            _ = bot::commands::shutdown_bot().await;
                             exit_app().await;
                         });
                     }
@@ -77,8 +81,12 @@ pub fn run() {
             // May this function never panic for the sake of my sanity
             logging::init(&config_path).unwrap();
 
-            config::initialize(&config_path);
-            database::initialize();
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                app_handle.manage(AppConfiguration::new(&config_path));
+                app_handle.manage(Database::new().await);
+                app_handle.manage(Mutex::new(Option::<Bot>::None))
+            });
 
             Ok(())
         })
@@ -86,8 +94,8 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-pub fn get_app_handle() -> &'static AppHandle {
-    return APP_HANDLE.get().unwrap();
+pub fn app_handle() -> &'static AppHandle {
+    APP_HANDLE.get().unwrap()
 }
 
 pub async fn exit_app() {

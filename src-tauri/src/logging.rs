@@ -12,23 +12,23 @@ macro_rules! log_info {
 }
 
 pub fn emit_error(error: String) {
-    APP_HANDLE.get().unwrap().emit("error", error).unwrap();
+    app_handle().emit("error", error).unwrap();
 }
 
 macro_rules! log_error {
-    ($($args: tt)*) => {
+    ($($args: tt)*) => {{
         let _ = crate::logging::write_log(format!($($args)*), "ERROR");
         println!($($args)*);
 
         crate::logging::emit_error(format!($($args)*));
-    }
+    }}
 }
 
 pub(crate) use log_info;
 pub(crate) use log_error;
 use tauri::Emitter;
 
-use crate::APP_HANDLE;
+use crate::app_handle;
 
 pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
     let dir_path = format!("{}{}", config_path, "\\logs");
@@ -60,9 +60,9 @@ pub fn init(config_path: &str) -> Result<(), Box<dyn Error>> {
         }
     }
 
-    LOG_FILE.set(format!("{}\\log_{}.txt", &dir_path, current_time))?;
+    LOG_FILE.set(format!("{}\\log_{}.log", &dir_path, current_time))?;
 
-    log_info!("{}", "Logging Initialized. Hello!");
+    log_info!("{}", "Logging Initialized");
 
     Ok(())
 }
@@ -75,7 +75,7 @@ pub fn write_log(message: String, level: &str) -> Result<(), Box<dyn Error>> {
     }
 
     let log = format!(
-        "[{}][{}] {}\n",
+        "[{}] [{}] {}\n",
         chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.6f"),
         level,
         message

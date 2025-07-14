@@ -49,7 +49,7 @@ import SettingsRow from "../../../components/settings_row.svelte";
             icon="power_settings_new"
             isRed={true}
             onclick={async () => {
-                await invoke("logout");
+                await invoke("shutdown_bot");
 
                 $selectedBot = null;
                 await goto("/start_page");

@@ -17,7 +17,9 @@
 
     try {
       await invoke("start_bot", { token: value.token });
-    } catch(_) {
+    } catch(err) {
+      console.log(err);
+      
       await goto("/start_page", { replaceState: true });
       selectedBot.set(null);
       

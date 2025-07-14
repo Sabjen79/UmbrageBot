@@ -42,7 +42,7 @@
             validation={async () =>  {
                 tokenValidated = false;
 
-                return await invoke('validate_token', {token: token}).then(() => {
+                return await invoke('db_validate_token', {token: token}).then(() => {
                     tokenValidated = true;
                     return null;
                 }).catch((error) => {
@@ -55,14 +55,14 @@
         <div class="w-full flex justify-end mt-3">
             {#if botAccount == null}
                 <Button text="Add Bot" disabled={!tokenValidated} onclick={async () => {
-                    await invoke("insert_account", {token: token}).then(async () => {
+                    await invoke("db_insert_account", {token: token}).then(async () => {
                         await refreshBots();
                         dialog.close();
                     })
                 }}/>
             {:else}
                 <Button text="Update Token" disabled={!tokenValidated} onclick={async () => {
-                    await invoke("update_account_token", {id: botAccount.id, newToken: token}).then(async () => {
+                    await invoke("db_update_account", {id: botAccount.id, newToken: token}).then(async () => {
                         await refreshBots();
                         dialog.close();
                     })

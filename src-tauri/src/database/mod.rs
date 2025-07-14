@@ -1,43 +1,45 @@
 use rusqlite::Connection;
-use std::sync::OnceLock;
+use tauri::{Manager, State};
+use tokio::sync::Mutex;
 
-use crate::logging::log_info;
-
-use super::config::config_path;
+use crate::{app_handle, config::app_config, logging::log_info};
 
 pub mod bot_accounts;
+pub mod commands;
 
-static DB_PATH: OnceLock<String> = OnceLock::new();
-
-pub(super) fn initialize() {
-    DB_PATH.set(config_path("\\database.db")).unwrap();
-
-    // REMINDER: Clear every table accordingly when deleting bots
-    get_connection()
-        .execute("
-            CREATE TABLE IF NOT EXISTS accounts (
-                id TEXT PRIMARY KEY,
-                token TEXT NOT NULL,
-                name TEXT NOT NULL,
-                avatar_url TEXT NOT NULL
-            )", ())
-        .unwrap();
-
-    get_connection()
-        .execute("
-            CREATE TABLE IF NOT EXISTS usernames (
-                id TEXT PRIMARY KEY,
-                bot_id TEXT NOT NULL,
-                date_created INTEGER,
-                username TEXT NOT NULL
-            )", ())
-        .unwrap();
-
-    log_info!("{}", "Database Initialized");
+/// Manager responsible for database operations
+pub struct Database {
+    pub(in crate::database) connection: Mutex<Connection>
 }
 
+pub fn database() -> State<'static, Database> {
+    app_handle().state::<Database>()
+}
 
-// TODO: Keep connection open
-pub(in crate::database) fn get_connection() -> Connection {
-    Connection::open(DB_PATH.get().unwrap()).unwrap()
+impl Database {
+    pub async fn new() -> Database {
+        let config = app_config();
+
+        let path = config.config_path.clone() + "\\database.db";
+
+        let _self = Self { 
+            connection: Mutex::new(Connection::open(&path).unwrap())
+        };
+
+        let conn = Connection::open(&path).unwrap();
+
+        // REMINDER: Clear every table accordingly when deleting bots
+        conn.execute("
+                CREATE TABLE IF NOT EXISTS accounts (
+                    id TEXT PRIMARY KEY,
+                    token TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    avatar_url TEXT NOT NULL
+                )", ())
+            .unwrap();
+
+        log_info!("{}", "Database Initialized");
+
+        return _self;
+    }
 }

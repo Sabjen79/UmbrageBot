@@ -98,7 +98,7 @@
 
         <Button isRed={true} text="Goodbye ;-;" onclick={async () => {
             deleteDialog.block();
-            await invoke("delete_account", {id: account.id, deleteData: deleteData});
+            await invoke("db_delete_account", {id: account.id, deleteData: deleteData});
             deleteDialog.unblock();
             deleteDialog.close();
             await refreshBots();
