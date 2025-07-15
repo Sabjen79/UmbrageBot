@@ -12,7 +12,7 @@ pub struct Database {
     pub(in crate::database) connection: Mutex<Connection>
 }
 
-pub fn database() -> State<'static, Database> {
+pub(in crate::database) fn database() -> State<'static, Database> {
     app_handle().state::<Database>()
 }
 

@@ -5,7 +5,6 @@
     } = $props();
 
     let pressed = $state();
-
 </script>
 
 <div class="inline-flex justify-between h-6 select-none">

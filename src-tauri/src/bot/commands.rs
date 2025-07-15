@@ -30,12 +30,12 @@ pub async fn shutdown_bot() -> Result<(), String> {
     {
         if let Some(bot) = &*bot_state.lock().await {
             bot.shutdown();
+
+            EventManager::wait_notify(NotifyEvents::BotShutdownSuccess).await;
         }
 
         *bot_state.lock().await = None;
     }
-    
-    EventManager::wait_notify(NotifyEvents::BotShutdownSuccess).await;
 
     Ok(())
 }

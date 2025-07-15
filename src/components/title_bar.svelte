@@ -12,27 +12,27 @@
 
 <div 
     data-tauri-drag-region 
-    class="titlebar h-8 fixed flex justify-end top-0 left-0 right-1.5 bg-transparent z-100"
+    class="titlebar h-6 fixed flex justify-end top-0 left-0 right-1.5 bg-transparent z-100"
 >
     <button
         class="titlebar-button {buttonStyle}"
         id="titlebar-minimize"
         onclick={getCurrentWindow().minimize}
     >
-        <span class="font-icons text-xl"> horizontal_rule </span>
+        <span class="font-icons text-md"> horizontal_rule </span>
     </button>
     <button
         class="titlebar-button {buttonStyle}"
         id="titlebar-maximize"
         onclick={getCurrentWindow().toggleMaximize}
     >
-        <span class="font-icons text-xl"> check_box_outline_blank </span>
+        <span class="font-icons text-md"> check_box_outline_blank </span>
     </button>
     <button
         class="titlebar-button {buttonStyle}"
         id="titlebar-close"
         onclick={getCurrentWindow().hide}
     >
-        <span class="font-icons text-2xl"> close </span>
+        <span class="font-icons text-xl"> close </span>
     </button>
 </div>

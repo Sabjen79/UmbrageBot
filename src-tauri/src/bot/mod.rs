@@ -3,9 +3,9 @@ use std::{error::Error, sync::Arc};
 use event_handler::EventHandler;
 use serenity::{all::{GatewayIntents, Http}, Client};
 use tauri::{Listener, Manager, State};
-use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard, Notify};
+use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 
-use crate::{app_handle, config::app_config, database::database, event_manager::{events::NotifyEvents, EventManager}, logging::{log_error, log_info}};
+use crate::{app_handle, config::AppConfiguration, database::Database, event_manager::{events::NotifyEvents, EventManager}, logging::{log_error, log_info}};
 
 mod event_handler;
 pub mod account_manager;
@@ -29,9 +29,9 @@ impl Bot {
 
         match user_res {
             Ok(user) => {
-                app_config().initialize_bot_config(user.id.to_string()).await;
+                AppConfiguration::initialize_bot_config(user.id.to_string()).await;
                 
-                database().update_account_info(&user).await;
+                Database::update_account_info(&user).await;
             }
             Err(_) => {
                 return Err("Invalid Bot Token".into());
@@ -47,7 +47,6 @@ impl Bot {
         let manager = client.shard_manager.clone();
 
         let shutdown_handle = tokio::spawn(async move {
-            // TODO: Convert notifiers to tauri events
             EventManager::wait_notify(NotifyEvents::BotShutdownStart).await;
             
             manager.shutdown_all().await;

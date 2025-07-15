@@ -1,6 +1,6 @@
 use serenity::{all::CurrentUser, prelude::*};
 
-use crate::{config::app_config, database::Database};
+use crate::{config::app_config, database::{database, Database}};
 
 #[derive(serde::Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -12,7 +12,7 @@ pub struct BotAccount {
 }
 
 impl Database {
-    pub async fn validate_token(&self, token: &str) -> Result<(), String> {
+    pub async fn validate_token(token: &str) -> Result<(), String> {
         let _ = serenity::all::validate_token(token)
             .map_err(|err| err.to_string())?;
 
@@ -27,7 +27,7 @@ impl Database {
             .await
             .map_err(|_| "The provided token was invalid")?;
 
-        let bots = self.get_all_accounts().await?;
+        let bots = Database::get_all_accounts().await?;
         for bot in bots {
             if bot.token == token {
                 return Err("This bot is already added".into());
@@ -37,8 +37,9 @@ impl Database {
         Ok(())
     }
 
-    pub async fn get_all_accounts(&self) -> Result<Vec<BotAccount>, String> {
-        let conn = self.connection.lock().await;
+    pub async fn get_all_accounts() -> Result<Vec<BotAccount>, String> {
+        let database = database();
+        let conn = database.connection.lock().await;
 
         let mut stmt = conn
             .prepare("SELECT id, token, name, avatar_url FROM accounts")
@@ -60,9 +61,11 @@ impl Database {
         Ok(result)
     }
 
-    pub async fn insert_account(&self, token: &str) -> Result<(), String> {
-        let conn = self.connection.lock().await;
-        let user = self.get_bot_info(token).await?;
+    pub async fn insert_account(token: &str) -> Result<(), String> {
+        let database = database();
+
+        let conn = database.connection.lock().await;
+        let user = Database::get_bot_info(token).await?;
 
         let mut stmt = conn
             .prepare("SELECT COUNT(*) FROM accounts WHERE token = ?1")
@@ -88,9 +91,10 @@ impl Database {
         Ok(())
     }
 
-    pub async fn update_account_token(&self, id: &str, new_token: &str) -> Result<(), String> {
-        let conn = self.connection.lock().await;
-        let user = self.get_bot_info(new_token).await?;
+    pub async fn update_account_token(id: &str, new_token: &str) -> Result<(), String> {
+        let database = database();
+        let conn = database.connection.lock().await;
+        let user = Database::get_bot_info(new_token).await?;
 
         if id != user.id {
             return Err("Token doesn't correspond to this bot".to_string());
@@ -109,8 +113,9 @@ impl Database {
         Ok(())
     }
 
-    pub async fn delete_account(&self, id: &str, delete_data: bool) -> Result<(), String> {
-        let conn = self.connection.lock().await;
+    pub async fn delete_account(id: &str, delete_data: bool) -> Result<(), String> {
+        let database = database();
+        let conn = database.connection.lock().await;
 
         conn.execute("DELETE FROM accounts WHERE id = ?1", (&id,))
             .map_err(|err| err.to_string())?;
@@ -127,8 +132,9 @@ impl Database {
         Ok(())
     }
 
-    pub async fn update_account_info(&self, user: &CurrentUser) {
-        let conn = self.connection.lock().await;
+    pub async fn update_account_info(user: &CurrentUser) {
+        let database = database();
+        let conn = database.connection.lock().await;
 
         conn.execute("
                 UPDATE accounts
@@ -138,7 +144,7 @@ impl Database {
         ).unwrap();
     }
 
-    async fn get_bot_info(&self, token: &str) -> Result<BotAccount, String> {
+    async fn get_bot_info(token: &str) -> Result<BotAccount, String> {
         let client = Client::builder(token, GatewayIntents::all())
             .status(serenity::all::OnlineStatus::Invisible)
             .await
