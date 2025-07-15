@@ -5,15 +5,13 @@ use serenity::{all::{GatewayIntents, Http}, Client};
 use tauri::{Listener, Manager, State};
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard, Notify};
 
-use crate::{app_handle, config::app_config, database::database, logging::{log_error, log_info}};
+use crate::{app_handle, config::app_config, database::database, event_manager::{events::NotifyEvents, EventManager}, logging::{log_error, log_info}};
 
 mod event_handler;
 pub mod account_manager;
 pub mod commands;
 
 pub struct Bot {
-    login_notify: Arc<Notify>,
-    shutdown_notify: Arc<Notify>,
     tauri_event_listeners: Arc<Mutex<Vec<u32>>>,
     http: Arc<Http>
 }
@@ -40,24 +38,21 @@ impl Bot {
             }
         }
 
-        let manager = client.shard_manager.clone();
-
         let _self = Self {
-            login_notify: Arc::new(Notify::new()),
-            shutdown_notify: Arc::new(Notify::new()), 
             tauri_event_listeners: Arc::new(Mutex::new(Vec::new())), 
             http: client.http.clone()
         };
 
         // Shutdown Thread
-        let manager_clone = manager.clone();
-        let shutdown_notify = _self.shutdown_notify.clone();
+        let manager = client.shard_manager.clone();
 
         let shutdown_handle = tokio::spawn(async move {
             // TODO: Convert notifiers to tauri events
-            shutdown_notify.notified().await;
+            EventManager::wait_notify(NotifyEvents::BotShutdownStart).await;
             
-            manager_clone.shutdown_all().await;
+            manager.shutdown_all().await;
+
+            EventManager::emit_notify(NotifyEvents::BotShutdownSuccess);
 
             log_info!("Bot shutdown successfully");
         });
@@ -82,7 +77,7 @@ impl Bot {
     }
 
     pub fn shutdown(&self) {
-        self.shutdown_notify.notify_waiters();
+        EventManager::emit_notify(NotifyEvents::BotShutdownStart);
     }
 }
 
@@ -102,7 +97,7 @@ impl BotStateExt for BotState {
         let guard = self.lock().await;
 
         if guard.is_none() {
-            panic!("There is no bot active")
+            panic!("There is no bot active");
         }
 
         MutexGuard::map(guard, |opt| opt.as_mut().unwrap())

@@ -1,17 +1,16 @@
-use crate::{bot::{active_bot, Bot}, logging::log_error};
+use crate::{bot::{active_bot, Bot}, event_manager::{events::NotifyEvents, EventManager}, logging::log_error};
 
 #[tauri::command]
 pub async fn start_bot(token: String) -> Result<(), String> {
     match Bot::start_bot(token.as_str()).await.map_err(|e| e.to_string()) {
         Ok(bot) => {
-            let notify = bot.login_notify.clone();
+            {
+                let state = active_bot();
+                let mut lock = state.lock().await;
+                *lock = Some(bot);
+            }
 
-            let state = active_bot();
-            let mut lock = state.lock().await;
-            *lock = Some(bot);
-            drop(lock);
-            
-            notify.notified().await;
+            EventManager::wait_notify(NotifyEvents::BotLoginSuccess).await;
 
             return Ok(());
         }
@@ -28,11 +27,15 @@ pub async fn start_bot(token: String) -> Result<(), String> {
 pub async fn shutdown_bot() -> Result<(), String> {
     let bot_state = active_bot();
     
-    if let Some(bot) = &*bot_state.lock().await {
-        bot.shutdown();
-    }
+    {
+        if let Some(bot) = &*bot_state.lock().await {
+            bot.shutdown();
+        }
 
-    *bot_state.lock().await = None;
+        *bot_state.lock().await = None;
+    }
+    
+    EventManager::wait_notify(NotifyEvents::BotShutdownSuccess).await;
 
     Ok(())
 }

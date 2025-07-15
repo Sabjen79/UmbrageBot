@@ -4,12 +4,13 @@ use tauri::{menu::{Menu, MenuItem}, tray::{MouseButton, TrayIconBuilder, TrayIco
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tokio::sync::Mutex;
 
-use crate::{bot::Bot, config::AppConfiguration, database::Database};
+use crate::{bot::Bot, config::AppConfiguration, database::Database, event_manager::EventManager};
 
 mod config;
 mod database;
 mod logging;
 mod bot;
+mod event_manager;
 
 /// Use `app_handle()` instead!
 static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
@@ -83,6 +84,7 @@ pub fn run() {
 
             let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
+                app_handle.manage(EventManager::new());
                 app_handle.manage(AppConfiguration::new(&config_path));
                 app_handle.manage(Database::new().await);
                 app_handle.manage(Mutex::new(Option::<Bot>::None))
