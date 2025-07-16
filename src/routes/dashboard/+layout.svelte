@@ -4,25 +4,26 @@
 	let { children } = $props();
 </script>
 
-<main class="absolute inset-0 top-6 overflow-hidden z-1">
+<main class={`
+    w-full h-full mt-12 overflow-hidden
+    flex bg-gray-900 shadow-container z-1
+`}>
+    <div class="fade z-10">
+        <Sidebar />
+    </div>
 
     <div class={`
-        absolute inset-0
-        flex items-center justify-center overflow-clip
-        bg-gray-900 shadow-container
+        flex-1 flex items-center justify-center
     `}>
         <div class={`
-            fade absolute flex flex-col
-            inset-0 overflow-y-scroll py-4 px-3 max-w-300 m-auto
-             pl-12 xl:left-24
+            h-full w-0 flex-grow min-w-0
+            fade overflow-y-scroll
+            max-w-250 mx-4 mt-4
         `}>
             {@render children()}
         </div>
     </div>
     
-    <div class="fade">
-        <Sidebar />
-    </div>
 
 </main>
 

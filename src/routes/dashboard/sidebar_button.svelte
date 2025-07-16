@@ -26,7 +26,7 @@
         console.log(page.url.pathname);
     }}
     class={`
-        flex items-start my-3
+        flex items-center my-3
         ${hover ? "cursor-pointer" : ""}
         ${active || pressed ? "text-primary-600" : hover ? "text-primary-400" : "text-gray-100"}
     `}
@@ -55,7 +55,7 @@
     <div class={`
         text-lg hidden xl:inline
         duration-150 font-semibold
-        ${hover && !pressed || active ? "ml-1" : "ml-0"}
+        ${hover && !pressed || active ? "ml-0.5" : "ml-0"}
         ${active || pressed ? "text-primary-500" : hover ? "text-primary-400" : "text-gray-100"}
     `}>
         {text}

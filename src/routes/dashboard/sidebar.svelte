@@ -1,15 +1,14 @@
 <script lang="ts">
-    import { selectedBot } from "../../stores/bot_accounts_store";
     import SidebarButton from "./sidebar_button.svelte";
 </script>
 
 <div
     class={`
-        absolute overflow-clip
-        left-0 top-0 bottom-0
+        flex flex-col items-start z-1
+        w-12 xl:w-30 h-full pb-6 ml-2
         duration-200 ease-in-out select-none
-        text-gray-100 rounded-lg
-        flex flex-col
+        text-gray-100 border-r-1 border-gray-800
+        shadow-[4px_0_5px_rgba(0,0,0,0.25)]
     `}
 >
     <SidebarButton icon="account_circle" text="Account" href="/dashboard/account"/>
