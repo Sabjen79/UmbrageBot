@@ -1,41 +1,73 @@
-use tauri::{Emitter, Listener};
-use tokio::sync::oneshot::{self};
+use std::fmt::Debug;
 
-use crate::{app_handle, logging::log_error};
+use serde::{de::DeserializeOwned, Serialize};
+use tauri::{Emitter, Listener, Manager, State};
+use tokio::sync::{oneshot::{self}, Mutex};
+
+use crate::{app_handle, event_manager::events::TauriEvent, logging::log_error};
 
 pub mod events;
 
 pub struct EventManager {
-    
+    event_listeners: Mutex<Vec<u32>>,
 }
 
-// pub fn event_manager() -> State<'static, EventManager> {
-//     app_handle().state::<EventManager>()
-// }
+pub fn event_manager() -> State<'static, EventManager> {
+    app_handle().state::<EventManager>()
+}
 
 /// Wrapper around tauri events, use this instead of calling `AppHandle` functions
 impl EventManager {
     pub fn new() -> EventManager {
         Self { 
-            
+            event_listeners: Mutex::new(Vec::new())
         }
     }
 
-    pub fn emit_notify(event: events::NotifyEvents) {
+    pub fn emit<T: TauriEvent + Serialize + Clone>(event: T) {
         app_handle()
-            .emit(event.to_string().as_str(), ())
+            .emit(T::name().as_str(), event)
             .unwrap_or_else(|err| {
                 log_error!("Cannot emit event: {}", err.to_string());
             });
     }
 
-    pub async fn wait_notify(event: events::NotifyEvents) {
+    pub async fn wait<T: TauriEvent + Debug + Send + 'static>(event: T) -> T {
         let (sx, rx) = oneshot::channel();
 
-        app_handle().once(event.to_string().as_str(), |_| {
-            sx.send(()).unwrap();
+        app_handle().once(T::name().as_str(), move |_| {
+            sx.send(event).unwrap();
         });
 
-        rx.await.unwrap();
+        rx.await.unwrap()
+    }
+
+    pub fn listen<T: TauriEvent + DeserializeOwned>(handler: impl Fn(T) + Send + 'static) {
+        let event_id = app_handle().listen(T::name(), move |ev| {
+            let payload = ev.payload();
+            match serde_json::from_str::<T>(payload) {
+                Ok(value) => handler(value),
+                Err(err) => {
+                    log_error!("Failed to parse event payload: {}", err);
+                }
+            }
+        });
+        
+        // Store the event_id for later cleanup
+        tokio::spawn(async move {
+            let em = event_manager();
+            em.event_listeners.lock().await.push(event_id);
+        });
+    }
+
+    pub async fn unlisten_all() {
+        let em = event_manager();
+        let mut vec = em.event_listeners.lock().await;
+
+        for event in &*vec {
+            app_handle().unlisten(*event);
+        }
+
+        (*vec).clear();
     }
 }

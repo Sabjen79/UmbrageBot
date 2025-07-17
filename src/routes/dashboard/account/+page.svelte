@@ -15,7 +15,7 @@ import SettingsRow from "../../../components/settings_row.svelte";
 <div
     class={`
         w-full h-40 bg-gray-800 rounded-md shadow-container
-        flex items-center
+        flex items-center relative
     `}
 >
     <div
@@ -42,7 +42,7 @@ import SettingsRow from "../../../components/settings_row.svelte";
 
     <div
         class={`
-            absolute right-5 top-6
+            absolute right-1 top-1
         `}
     >
         <Button 
@@ -72,7 +72,7 @@ import SettingsRow from "../../../components/settings_row.svelte";
     <Divider/>
 
     <div
-        class={`-mt-0.5 -mb-0.25 w-25 border-b-3 border-b-primary-500 duration-250 ease-out`}
+        class={`-mt-0.5 -mb-0.25 w-25 border-b-3 border-b-primary-400 duration-250 ease-out`}
         style="transform: translateX({tabIndex * 100}%)"
     ></div>
     

@@ -2,17 +2,16 @@ use std::{error::Error, sync::Arc};
 
 use event_handler::EventHandler;
 use serenity::{all::{GatewayIntents, Http}, Client};
-use tauri::{Listener, Manager, State};
+use tauri::{Manager, State};
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 
-use crate::{app_handle, config::AppConfiguration, database::Database, event_manager::{events::NotifyEvents, EventManager}, logging::{log_error, log_info}};
+use crate::{app_handle, bot::account_manager::BotProfile, config::AppConfiguration, database::Database, event_manager::{event_manager, events::{BotShutdownStartEvent, BotShutdownSuccessEvent}, EventManager}, logging::{log_error, log_info}};
 
 mod event_handler;
 pub mod account_manager;
 pub mod commands;
 
 pub struct Bot {
-    tauri_event_listeners: Arc<Mutex<Vec<u32>>>,
     http: Arc<Http>
 }
 
@@ -39,7 +38,6 @@ impl Bot {
         }
 
         let _self = Self {
-            tauri_event_listeners: Arc::new(Mutex::new(Vec::new())), 
             http: client.http.clone()
         };
 
@@ -47,18 +45,16 @@ impl Bot {
         let manager = client.shard_manager.clone();
 
         let shutdown_handle = tokio::spawn(async move {
-            EventManager::wait_notify(NotifyEvents::BotShutdownStart).await;
+            EventManager::wait(BotShutdownStartEvent).await;
             
             manager.shutdown_all().await;
 
-            EventManager::emit_notify(NotifyEvents::BotShutdownSuccess);
+            EventManager::emit(BotShutdownSuccessEvent);
 
             log_info!("Bot shutdown successfully");
         });
 
         // Bot Thread
-        let listeners = _self.tauri_event_listeners.clone();
-
         tokio::spawn(async move {
             // This function runs continously until the bot is closed
             if let Err(why) = client.start().await { 
@@ -67,16 +63,14 @@ impl Bot {
 
             shutdown_handle.abort();
 
-            for event in &*listeners.lock().await {
-                app_handle().unlisten(*event);
-            }
+            EventManager::unlisten_all().await;
         });
 
         Ok(_self)
     }
 
     pub fn shutdown(&self) {
-        EventManager::emit_notify(NotifyEvents::BotShutdownStart);
+        EventManager::emit(BotShutdownStartEvent);
     }
 }
 

@@ -1,14 +1,15 @@
-// use serde::Serialize;
-// use serenity::all::CurrentUser;
-// use tauri::Emitter;
+use serde::{Deserialize, Serialize};
+use serenity::all::CurrentUser;
+use tauri::Emitter;
 
-// pub mod account_username;
-// pub mod account_status;
+pub mod account_username;
+pub mod account_status;
 
-// #[derive(Serialize, Clone)]
-// struct BotProfile {
-//     username: String,
-// }
+// This struct should reflect the store in Svelte
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct BotProfile {
+    pub username: String,
+}
 
 // pub async fn initialize() {
 //     // listen("username", async |event, http| {

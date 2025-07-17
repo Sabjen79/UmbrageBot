@@ -1,13 +1,38 @@
-use strum_macros::Display;
+use std::fmt::Debug;
 
-#[derive(Display, Debug)]
-pub enum NotifyEvents {
-    #[strum(to_string = "BOT_LOGIN_SUCCESS")]
-    BotLoginSuccess,
+use convert_case::{Case, Casing};
+use serde::{Deserialize, Serialize};
 
-    #[strum(to_string = "BOT_SHUTDOWN_START")]
-    BotShutdownStart,
-
-    #[strum(to_string = "BOT_SHUTDOWN_SUCCESS")]
-    BotShutdownSuccess,
+/// Trait that adds the function `name()` to a struct to get its type name in UPPER_CASE
+pub trait TauriEvent {
+    fn name() -> String;
 }
+
+macro_rules! impl_type_name {
+    ($($ty:ty),*) => {
+        $(impl TauriEvent for $ty {
+            fn name() -> String {
+                let s = stringify!($ty).to_string();
+
+                s.to_case(Case::Constant)
+            }
+        })*
+    }
+}
+
+// REMEMBER: Add all struct events in this function to implement the event trait
+impl_type_name!(
+    BotLoginSuccessEvent,
+    BotShutdownStartEvent,
+    BotShutdownSuccessEvent
+);
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BotLoginSuccessEvent;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BotShutdownStartEvent;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BotShutdownSuccessEvent;
+

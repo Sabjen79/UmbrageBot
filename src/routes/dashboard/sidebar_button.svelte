@@ -28,7 +28,7 @@
     class={`
         flex items-center my-3
         ${hover ? "cursor-pointer" : ""}
-        ${active || pressed ? "text-primary-600" : hover ? "text-primary-400" : "text-gray-100"}
+        ${active || pressed ? "text-primary-500" : hover ? "text-primary-400" : "text-gray-100"}
     `}
 >
 
@@ -43,7 +43,7 @@
     <div
         class={`
             fixed left-13 px-2 rounded-md 
-            text-md text-gray-100 translate-y-1
+            text-md text-gray-100
             bg-gray-800 shadow-container xl:invisible
             origin-left duration-200 pointer-events-none
             ${hover ? "opacity-100 scale-100" : "opacity-0 scale-50"}

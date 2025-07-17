@@ -24,29 +24,29 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --color-gray-50: #dee3ed;
-    --color-gray-100: #cfd5e3;
-    --color-gray-200: #b4bbd0;
-    --color-gray-300: #969fba;
-    --color-gray-400: #7b83a3;
-    --color-gray-500: #656b8b;
-    --color-gray-600: #51556b;
-    --color-gray-700: #3d3e4d;
-    --color-gray-800: #22222b;
-    --color-gray-900: #131316;
+    --color-gray-50: #f0f0f4;
+    --color-gray-100: #e2e2e9;
+    --color-gray-200: #c3c3cf;
+    --color-gray-300: #a7a7b8;
+    --color-gray-400: #8d8d9f;
+    --color-gray-500: #707083;
+    --color-gray-600: #585869;
+    --color-gray-700: #41414d;
+    --color-gray-800: #292931;
+    --color-gray-900: #151519;
     --color-gray-950: #070708;
 
-    --color-primary-50: light-dark(#e6f0ff, #e8f0fc);
-    --color-primary-100: light-dark(#cfdefc, #d2dff9);
-    --color-primary-200: light-dark(#a2b9f6, #a8bbf0);
-    --color-primary-300: light-dark(#7990ec, #7f93e6);
-    --color-primary-400: light-dark(#5265e0, #5769db);
-    --color-primary-500: light-dark(#333dcd, #333dcd);
-    --color-primary-600: light-dark(#1f32ad, #2436a8);
-    --color-primary-700: light-dark(#132a86, #192d80);
-    --color-primary-800: light-dark(#09205d, #0f2257);
-    --color-primary-900: light-dark(#031230, #06132d);
-    --color-primary-950: light-dark(#000a19, #030b17);
+    --color-primary-50: #e9eafb;
+    --color-primary-100: #d7d7f8;
+    --color-primary-200: #afb1f1;
+    --color-primary-300: #878aea;
+    --color-primary-400: #5e64e0;
+    --color-primary-500: #333dcd;
+    --color-primary-600: #2831a9;
+    --color-primary-700: #1e2485;
+    --color-primary-800: #141963;
+    --color-primary-900: #0a0e43;
+    --color-primary-950: #04062b;
 
     --font-sourcesans: SourceSans;
     --font-oversteer: UnsteadyOversteer;

@@ -1,7 +1,8 @@
 use serenity::all::*;
 use serenity::async_trait;
+use crate::bot::account_manager::BotProfile;
 use crate::bot::active_bot;
-use crate::event_manager::events::NotifyEvents;
+use crate::event_manager::events::BotLoginSuccessEvent;
 use crate::event_manager::EventManager;
 use crate::logging::log_info;
 
@@ -16,7 +17,7 @@ impl serenity::prelude::EventHandler for EventHandler {
 
         // account_manager::emit_user_update(&current_user);
 
-        EventManager::emit_notify(NotifyEvents::BotLoginSuccess);
+        EventManager::emit(BotLoginSuccessEvent);
 
         log_info!("{} is connected!", ready.user.name);
     }
