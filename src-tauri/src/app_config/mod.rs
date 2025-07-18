@@ -3,20 +3,16 @@ use std::{fs, io};
 use tauri::{Manager, State};
 use tokio::sync::Mutex;
 
-use crate::{app_handle, config::bot_config::BotConfig, logging::{log_error, log_info}};
+use crate::{app_handle, app_config::bot::BotConfig, logging::{log_error, log_info}};
 
-pub mod bot_config;
+pub mod bot;
 pub mod commands;
 
 /// Handles all operations regarding the `config` folder in `AppData`
 pub struct AppConfiguration {
     pub config_path: String,
     bot_config_path: Mutex<Option<String>>,
-    bot_config: Mutex<BotConfig>
-}
-
-pub fn app_config() -> State<'static, AppConfiguration> {
-    app_handle().state::<AppConfiguration>()
+    pub bot_config: Mutex<BotConfig>
 }
 
 impl AppConfiguration {
@@ -37,5 +33,9 @@ impl AppConfiguration {
             bot_config_path: Mutex::new(Option::None),
             bot_config: Mutex::new(BotConfig::new())
         }
+    }
+
+    pub fn get_state() -> State<'static, AppConfiguration> {
+        app_handle().state::<AppConfiguration>()
     }
 }

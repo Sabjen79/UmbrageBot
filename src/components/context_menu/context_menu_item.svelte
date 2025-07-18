@@ -1,4 +1,6 @@
 <script lang="ts">
+    import ContextMenuCustomItem from "./context_menu_custom_item.svelte";
+
     let {
         text = "",
         icon = "",
@@ -7,20 +9,11 @@
     } = $props();
 </script>
 
-<button
-    class={`
-        w-full h-8 flex items-center
-        bg-transparent hover:bg-gray-700
-        duration-100 hover:cursor-pointer
-        rounded-md ${isRed ? "text-red-500" : ""}
-    `}
-    onclick={() => {onclick()}}
->
-    <div class="font-icons text-xl mx-1">
+<ContextMenuCustomItem {onclick}>
+    <div class={`font-icons text-xl mx-1 ${isRed ? "text-red-500" : ""}`}>
         {icon}
     </div>
-    <div class="text-base ">
+    <div class={`text-base ${isRed ? "text-red-500" : ""}`}>
         {text}
     </div>
-    
-</button>
+</ContextMenuCustomItem>

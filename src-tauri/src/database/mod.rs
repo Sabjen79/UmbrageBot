@@ -2,7 +2,7 @@ use rusqlite::Connection;
 use tauri::{Manager, State};
 use tokio::sync::Mutex;
 
-use crate::{app_handle, config::app_config, logging::log_info};
+use crate::{app_config::AppConfiguration, app_handle, logging::log_info};
 
 pub mod bot_accounts;
 pub mod commands;
@@ -12,13 +12,9 @@ pub struct Database {
     pub(in crate::database) connection: Mutex<Connection>
 }
 
-pub(in crate::database) fn database() -> State<'static, Database> {
-    app_handle().state::<Database>()
-}
-
 impl Database {
     pub async fn new() -> Database {
-        let config = app_config();
+        let config = AppConfiguration::get_state();
 
         let path = config.config_path.clone() + "\\database.db";
 
@@ -41,5 +37,9 @@ impl Database {
         log_info!("{}", "Database Initialized");
 
         return _self;
+    }
+
+    pub fn get_state() -> State<'static, Database> {
+        app_handle().state::<Database>()
     }
 }

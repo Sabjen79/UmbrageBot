@@ -8,55 +8,12 @@ import SettingsRow from "../../../components/settings_row.svelte";
     import UsernameTab from "./username_tab.svelte";
     import { goto } from "$app/navigation";
     import { botProfile } from "../../../stores/bot_profile_store";
+    import TopBanner from "./top_banner.svelte";
 
     let tabIndex = 0;
 </script>
 
-<div
-    class={`
-        w-full h-40 bg-gray-800 rounded-md shadow-container
-        flex items-center relative
-    `}
->
-    <div
-        class={`
-            rounded-full w-30 h-30 inset-shadow-[0_0_10px_rgba(0,0,0,0.5)]
-            overflow-hidden mx-5
-        `}
-    >
-        <img class="pointer-events-none" 
-            alt={$botProfile.username} 
-            src={$selectedBot?.avatarUrl}
-        />
-    </div>
-
-    <div
-        class={`
-            flex-1 flex flex-col justify-center
-        `}
-    >
-        <p class="font-semibold text-3xl">
-            {$botProfile.username}
-        </p>
-    </div>
-
-    <div
-        class={`
-            absolute right-1 top-1
-        `}
-    >
-        <Button 
-            icon="power_settings_new"
-            isRed={true}
-            onclick={async () => {
-                await invoke("shutdown_bot");
-
-                $selectedBot = null;
-                await goto("/start_page");
-            }}
-        />
-    </div>
-</div>
+<TopBanner/>
 
 <div
     class={`

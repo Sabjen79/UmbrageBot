@@ -1,4 +1,5 @@
 <script lang="ts">
+    // TODO: Rework this ASAP
     let {
         value = $bindable(""),
         validated = $bindable(false),
@@ -36,6 +37,13 @@
 
         lastError = result;
         validated = (result == null);
+    }
+
+    export async function setError(err: string | null) {
+        firstValidation = false;
+        errorVisible = true;
+        lastError = err;
+        validated = (err == null);
     }
 
     if(value == "" && validation != null) {

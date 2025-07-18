@@ -4,9 +4,9 @@ use tauri::{menu::{Menu, MenuItem}, tray::{MouseButton, TrayIconBuilder, TrayIco
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tokio::sync::Mutex;
 
-use crate::{bot::Bot, config::AppConfiguration, database::Database, event_manager::EventManager};
+use crate::{bot::Bot, app_config::AppConfiguration, database::Database, event_manager::EventManager};
 
-mod config;
+mod app_config;
 mod database;
 mod logging;
 mod bot;
@@ -30,12 +30,13 @@ pub fn run() {
             database::commands::db_update_account,
             database::commands::db_delete_account,
 
-            config::commands::get_bot_config,
-            config::commands::set_bot_config,
+            app_config::commands::get_bot_config,
+            app_config::commands::set_bot_config,
             
             bot::commands::start_bot,
             bot::commands::shutdown_bot,
-            //bot::account_manager::account_username::change_username
+            bot::account_manager::commands::bot_set_username,
+            bot::account_manager::commands::bot_set_status
         ])
         .setup(|app| {
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;

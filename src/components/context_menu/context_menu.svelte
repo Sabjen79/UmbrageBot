@@ -60,10 +60,10 @@
         bind:this={menu}
         style="left: {posx}px; top: {posy}px;"
         class={`
-            relative bg-gray-800 shadow-container rounded-md
+            relative bg-gray-950 shadow-container rounded-md
             duration-150 transition-[opacity,scale] ease-in-out 
             ${visible ? "opacity-100 scale-100" : "opacity-0 scale-0 pointer-events-none"}
-            flex flex-col w-40 p-1 gap-1
+            flex flex-col w-40 p-2 gap-1
             ${openTop
                 ? openLeft ? "origin-top-right" : "origin-top-left"
                 : openLeft ? "origin-bottom-right" : "origin-bottom-left"
