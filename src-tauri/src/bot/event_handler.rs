@@ -1,7 +1,6 @@
 use serenity::all::*;
 use serenity::async_trait;
 
-use crate::app_config::AppConfiguration;
 use crate::bot;
 use crate::bot::account_manager::activity::ActivityWrapper;
 use crate::bot::Bot;
@@ -19,31 +18,9 @@ pub struct EventHandler;
 #[async_trait]
 impl serenity::prelude::EventHandler for EventHandler {
     async fn ready(&self, ctx: Context, ready: Ready) {
-        let state = Bot::get_state();
-
-        let _current_user = ctx.http.get_current_user().await.unwrap();
+        bot::account_manager::initialize(&ctx).await;
 
         event_manager::emit(BotLoginSuccessEvent);
-
-        {
-            let bot = state.lock_and_get().await;
-
-            _ = bot.shard_messenger.set(ctx.shard);
-
-            let profile = bot.profile.lock().await;
-
-            event_manager::emit(BotProfileUpdateEvent {
-                data: profile.clone()
-            });
-        }
-
-        let bot_config = {
-            let app_config = AppConfiguration::get_state();
-
-            app_config.bot_config.lock().await.clone()
-        };
-
-        _ = bot::account_manager::set_status(bot_config.bot_status).await;
 
         log_info!("{} is connected!", ready.user.name);
     }

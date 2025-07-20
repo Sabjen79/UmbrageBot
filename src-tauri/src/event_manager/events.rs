@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::bot::account_manager::BotProfile;
 
-/// Trait that adds the function `name()` to a struct to get its type name in UPPER_CASE
+/// Trait that adds the function `name()` to a struct to get its type name in UPPER_SNAKE_CASE
 pub trait TauriEvent {
     fn name() -> String;
 }

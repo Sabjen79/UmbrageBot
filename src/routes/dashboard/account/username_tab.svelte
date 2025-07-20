@@ -8,6 +8,7 @@
     import { emit } from "@tauri-apps/api/event";
     import { botConfig } from "../../../stores/bot_config_store";
     import { botProfile } from "../../../stores/bot_profile_store";
+    import TimerInfo from "../../../components/timer_info.svelte";
 
     let a = $state(false);
 
@@ -62,4 +63,6 @@
     </SettingsRow>
 
     <Divider />
+
+    <TimerInfo timer_name={"BOT_TEST_TIMER"} />
 </div>

@@ -5,7 +5,7 @@ use serenity::{all::{GatewayIntents, Http, OnlineStatus, ShardMessenger}, Client
 use tauri::{Manager, State};
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 
-use crate::{app_handle, bot::account_manager::{activity::ActivityWrapper, BotProfile}, app_config::{self}, database::{self}, event_manager::{self, events::{BotShutdownStartEvent, BotShutdownSuccessEvent}}, logging::{log_error, log_info}};
+use crate::{app_config::{self}, app_handle, bot::account_manager::{activity::ActivityWrapper, BotProfile}, database::{self}, event_manager::{self, events::{BotShutdownStartEvent, BotShutdownSuccessEvent}}, logging::{log_error, log_info}, timer_manager};
 
 mod event_handler;
 pub mod account_manager;
@@ -79,6 +79,7 @@ impl Bot {
             shutdown_handle.abort();
 
             event_manager::unlisten_all().await;
+            timer_manager::cancel_all().await;
         });
 
         Ok(_self)

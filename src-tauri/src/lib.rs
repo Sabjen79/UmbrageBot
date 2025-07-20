@@ -4,13 +4,14 @@ use tauri::{menu::{Menu, MenuItem}, tray::{MouseButton, TrayIconBuilder, TrayIco
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use tokio::sync::Mutex;
 
-use crate::{bot::Bot, app_config::AppConfiguration, database::Database, event_manager::EventManager};
+use crate::{app_config::AppConfiguration, bot::Bot, database::Database, event_manager::EventManager, timer_manager::TimerManager};
 
 mod app_config;
 mod database;
 mod logging;
 mod bot;
 mod event_manager;
+mod timer_manager;
 
 /// Use `app_handle()` instead!
 static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
@@ -32,6 +33,10 @@ pub fn run() {
 
             app_config::commands::get_bot_config,
             app_config::commands::set_bot_config,
+
+            timer_manager::commands::timer_run_early,
+            timer_manager::commands::timer_reset,
+            timer_manager::commands::timer_get_time_left,
             
             bot::commands::start_bot,
             bot::commands::shutdown_bot,
@@ -88,7 +93,8 @@ pub fn run() {
                 app_handle.manage(EventManager::new());
                 app_handle.manage(AppConfiguration::new(&config_path));
                 app_handle.manage(Database::new().await);
-                app_handle.manage(Mutex::new(Option::<Bot>::None))
+                app_handle.manage(TimerManager::new());
+                app_handle.manage(Mutex::new(Option::<Bot>::None));
             });
 
             Ok(())

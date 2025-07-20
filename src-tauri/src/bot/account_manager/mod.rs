@@ -1,9 +1,9 @@
-use std::error::Error;
+use std::{error::Error, time::Duration};
 
 use serde::{Deserialize, Serialize};
-use serenity::all::{EditProfile, OnlineStatus};
+use serenity::all::{Context, EditProfile, OnlineStatus};
 
-use crate::{bot::{account_manager::activity::ActivityWrapper, Bot, BotStateExt}, app_config, event_manager::{self, events::BotProfileUpdateEvent}};
+use crate::{app_config::{self, AppConfiguration}, bot::{self, account_manager::activity::ActivityWrapper, Bot, BotStateExt}, event_manager::{self, events::BotProfileUpdateEvent}, timer_manager};
 
 pub mod activity;
 pub mod commands;
@@ -16,6 +16,41 @@ pub struct BotProfile {
     pub banner_url: String,
     pub status: OnlineStatus,
     pub activity: ActivityWrapper
+}
+
+pub async fn initialize(ctx: &Context) {
+    let state = Bot::get_state();
+    let _current_user = ctx.http.get_current_user().await.unwrap();
+
+    {
+        let bot = state.lock_and_get().await;
+
+        _ = bot.shard_messenger.set(ctx.shard.clone());
+
+        let profile = bot.profile.lock().await;
+
+        event_manager::emit(BotProfileUpdateEvent {
+            data: profile.clone()
+        });
+    }
+
+    let bot_config = {
+        let app_config = AppConfiguration::get_state();
+
+        app_config.bot_config.lock().await.clone()
+    };
+
+    _ = bot::account_manager::set_status(bot_config.bot_status).await;
+
+    timer_manager::new_timer("BOT_TEST_TIMER")
+        .action(|| async move {
+            println!("DAB");
+        })
+        .duration_handler(|| async move {
+            Duration::from_secs(3610)
+        })
+        .build_and_register()
+        .start();
 }
 
 pub async fn set_username(username: &str) -> Result<(), Box<dyn Error>> {
