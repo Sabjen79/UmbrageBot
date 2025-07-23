@@ -1,8 +1,8 @@
 use std::fmt::Debug;
-
+use std::sync::Mutex;
 use serde::{de::DeserializeOwned, Serialize};
 use tauri::{Emitter, Listener, Manager, State};
-use tokio::{runtime::Handle, sync::{oneshot::{self}, Mutex}};
+use tokio::{runtime::Handle, sync::{oneshot::{self}}};
 
 use crate::{app_handle, event_manager::events::TauriEvent, logging::log_error};
 
@@ -68,13 +68,13 @@ where
     // Store the event_id for later cleanup
     tokio::spawn(async move {
         let em = EventManager::get_state();
-        em.event_listeners.lock().await.push(event_id);
+        em.event_listeners.lock().unwrap().push(event_id);
     });
 }
 
-pub async fn unlisten_all() {
+pub fn unlisten_all() {
     let em = EventManager::get_state();
-    let mut vec = em.event_listeners.lock().await;
+    let mut vec = em.event_listeners.lock().unwrap();
 
     for event in &*vec {
         app_handle().unlisten(*event);

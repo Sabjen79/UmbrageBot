@@ -37,13 +37,14 @@ impl BotConfig {
     }
 }
 
-pub async fn initialize_bot_config(id: String) {
+pub fn initialize_bot_config(id: String) {
     let app_config = AppConfiguration::get_state();
     let path = format!("{}\\config\\{}.json", app_config.config_path, id);
 
-    let mut path_lock = app_config.bot_config_path.lock().await;
-    *path_lock = Some(path.clone());
-    drop(path_lock);
+    {
+        let mut path_lock = app_config.bot_config_path.lock().unwrap();
+        *path_lock = Some(path.clone());
+    }
 
     // Avoid holding any lock across await points
     let config: BotConfig = match read_to_string(&path) {
@@ -52,13 +53,13 @@ pub async fn initialize_bot_config(id: String) {
                 Ok(cfg) => cfg,
                 Err(_) => {
                     log_info!("Bot configuration is invalid! Creating new one");
-                    app_config::bot::new_config().await
+                    app_config::bot::new_config()
                 }
             }
         }
         Err(_) => {
             log_info!("Bot configuration could not be found! Creating new one");
-            app_config::bot::new_config().await
+            app_config::bot::new_config()
         }
     };
 
@@ -66,56 +67,56 @@ pub async fn initialize_bot_config(id: String) {
         log_error!("Error emitting bot_config_update: {}", why.to_string());
     };
 
-    let mut config_lock = app_config.bot_config.lock().await;
+    let mut config_lock = app_config.bot_config.lock().unwrap();
     *config_lock = config;
 }
 
-pub async fn bot_config() -> BotConfig {
+pub fn bot_config() -> BotConfig {
     let state = AppConfiguration::get_state();
 
-    let config = state.bot_config.lock().await;
+    let config = state.bot_config.lock().unwrap();
 
     return config.clone();
 }
 
-pub async fn edit_bot_config<F>(callback: F) -> Result<(), Box<dyn Error>>
+pub fn edit_bot_config<F>(callback: F) -> Result<(), Box<dyn Error>>
 where
     F: FnOnce(&mut BotConfig),
 {
-    edit_config(callback, BotConfigUpdateSource::Backend).await
+    edit_config(callback, BotConfigUpdateSource::Backend)
 }
 
 /// Only frontend should call this
-pub async fn edit_bot_config_frontend<F>(callback: F) -> Result<(), Box<dyn Error>>
+pub fn edit_bot_config_frontend<F>(callback: F) -> Result<(), Box<dyn Error>>
 where
     F: FnOnce(&mut BotConfig),
 {
-    edit_config(callback, BotConfigUpdateSource::Frontend).await
+    edit_config(callback, BotConfigUpdateSource::Frontend)
 }
 
 //============================================================================
 
-async fn new_config() -> BotConfig {
+fn new_config() -> BotConfig {
     let config = BotConfig::new();
 
-    if let Err(why) = app_config::bot::save_config().await {
+    if let Err(why) = app_config::bot::save_config() {
         log_error!("Cannot save config: {}", why.to_string());
     };
 
     return config;
 }
 
-async fn save_config() -> Result<(), Box<dyn Error>> {
+fn save_config() -> Result<(), Box<dyn Error>> {
     let app_config = AppConfiguration::get_state();
 
     let path_opt = {
-        let path_lock = app_config.bot_config_path.lock().await;
+        let path_lock = app_config.bot_config_path.lock().unwrap();
         path_lock.clone()
     };
 
     if let Some(path) = path_opt {
         let config_json = {
-            let config = app_config.bot_config.lock().await;
+            let config = app_config.bot_config.lock().unwrap();
             serde_json::to_string_pretty(&*config)?
         };
 
@@ -128,14 +129,14 @@ async fn save_config() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-async fn edit_config<F>(callback: F, source: BotConfigUpdateSource) -> Result<(), Box<dyn Error>>
+fn edit_config<F>(callback: F, source: BotConfigUpdateSource) -> Result<(), Box<dyn Error>>
 where
     F: FnOnce(&mut BotConfig),
 {
     let app_config = AppConfiguration::get_state();
 
     {
-        let mut config_lock = app_config.bot_config.lock().await;
+        let mut config_lock = app_config.bot_config.lock().unwrap();
 
         let old_config = config_lock.clone();
 
@@ -148,7 +149,7 @@ where
         });
     }
 
-    match app_config::bot::save_config().await {
+    match app_config::bot::save_config() {
         Ok(()) => {}
         Err(err) => {
             log_error!("Cannot save config: {}", err.to_string());

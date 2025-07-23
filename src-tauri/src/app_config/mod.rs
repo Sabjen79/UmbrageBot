@@ -1,7 +1,7 @@
-use std::{fs, io};
+use std::{fs, io, sync::Mutex};
 
 use tauri::{Manager, State};
-use tokio::sync::Mutex;
+// use tokio::sync::Mutex;
 
 use crate::{app_handle, app_config::bot::BotConfig, logging::{log_error, log_info}};
 

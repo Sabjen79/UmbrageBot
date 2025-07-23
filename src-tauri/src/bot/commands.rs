@@ -6,7 +6,7 @@ pub async fn start_bot(token: String) -> Result<(), String> {
         Ok(bot) => {
             {
                 let state = Bot::get_state();
-                let mut lock = state.lock().await;
+                let mut lock = state.lock().unwrap();
                 *lock = Some(bot);
             }
 
@@ -25,17 +25,22 @@ pub async fn start_bot(token: String) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn shutdown_bot() -> Result<(), String> {
-    let bot_state = Bot::get_state();
-    
     {
-        if let Some(_) = &*bot_state.lock().await {
-            bot::shutdown();
+        let state = Bot::get_state();
+        let lock = state.lock().unwrap();
 
-            event_manager::wait(BotShutdownSuccessEvent).await;
+        if lock.is_none() {
+            return Ok(())
         }
-
-        *bot_state.lock().await = None;
     }
+
+    bot::shutdown();
+
+    event_manager::wait(BotShutdownSuccessEvent).await;
+
+    let state = Bot::get_state();
+    let mut lock = state.lock().unwrap();
+    *lock = None;
 
     Ok(())
 }

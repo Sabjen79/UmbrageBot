@@ -18,55 +18,55 @@ pub struct BotProfile {
     pub activity: ActivityWrapper
 }
 
-pub async fn edit_profile<F>(callback: F)
+pub fn edit_profile<F>(callback: F)
 where
     F: FnOnce(&mut BotProfile),
 {
     let state = Bot::get_state();
+    let lock = state.lock().unwrap();
+    let bot = lock.get_bot();
 
-    {
-        let bot = state.lock_and_get().await;
-        let mut lock = bot.profile.lock().await;
+    let mut profile_lock = bot.profile.lock().unwrap();
 
-        callback(&mut *lock);
+    callback(&mut *profile_lock);
 
-        event_manager::emit(BotProfileUpdateEvent {
-            data: lock.clone()
-        });
-    }
+    event_manager::emit(BotProfileUpdateEvent {
+        data: profile_lock.clone()
+    });
 }
 
 pub async fn initialize(ctx: &Context) {
-    let state = Bot::get_state();
     let _current_user = ctx.http.get_current_user().await.unwrap();
 
     {
-        let bot = state.lock_and_get().await;
+        let state = Bot::get_state();
+        let lock = state.lock().unwrap();
+        let bot = lock.get_bot();
 
         _ = bot.shard_messenger.set(Arc::new(ctx.shard.clone()));
 
-        let profile = bot.profile.lock().await;
+        let profile = bot.profile.lock().unwrap();
 
         event_manager::emit(BotProfileUpdateEvent {
             data: profile.clone()
         });
     }
 
-    let bot_config = app_config::bot::bot_config().await;
+    let bot_config = app_config::bot::bot_config();
 
     _ = bot::account_manager::set_status(bot_config.bot_status).await;
 
     // Activity
     timer_manager::new_timer("BOT_ACTIVITY_TIMER")
         .duration_handler(|| async move {
-            let bot_config = app_config::bot::bot_config().await;
+            let bot_config = app_config::bot::bot_config();
 
             let x = rand::random_range(bot_config.activity_timer_min..=bot_config.activity_timer_max);
 
             Ok(Duration::from_secs(x.into()))
         })
         .action(|| async move {
-            let bot_config = app_config::bot::bot_config().await;
+            let bot_config = app_config::bot::bot_config();
 
             if !bot_config.activity_timer_enabled {
                 return Ok(());
@@ -85,7 +85,7 @@ pub async fn initialize(ctx: &Context) {
         let config = &event.new_config;
         if config.activity_timer_enabled != event.old_config.activity_timer_enabled {
             if config.activity_timer_enabled {
-                if let Some(timer) = timer_manager::get_timer("BOT_ACTIVITY_TIMER").await {
+                if let Some(timer) = timer_manager::get_timer("BOT_ACTIVITY_TIMER") {
                     timer.run_early();
                 }
             } else {
@@ -100,7 +100,7 @@ pub async fn set_username(username: &str) -> Result<(), Box<dyn Error>> {
         return Err("Username cannot be empty".into());
     }
 
-    let http = bot::http().await;
+    let http = bot::http();
 
     let mut user = http.get_current_user().await?;
 
@@ -126,23 +126,23 @@ pub async fn set_status(status: OnlineStatus) -> Result<(), Box<dyn Error>> {
         return Err("Offline status is not valid".into());
     }
 
-    let shard = bot::shard_messenger().await;
+    let shard = bot::shard_messenger();
 
     shard.set_status(status);
 
     edit_profile(|profile| {
         profile.status = status;
-    }).await;
+    });
 
     app_config::bot::edit_bot_config(|config| {
         config.bot_status = status
-    }).await?;
+    })?;
 
     Ok(())
 }
 
 pub async fn set_activity(activity: ActivityWrapper) {
-    let shard = bot::shard_messenger().await;
+    let shard = bot::shard_messenger();
 
     match activity.clone().into_data() {
         Ok(act) => {
@@ -150,7 +150,7 @@ pub async fn set_activity(activity: ActivityWrapper) {
 
             edit_profile(|profile| {
                 profile.activity = activity;
-            }).await;
+            });
         }
         Err(err) => {
             log_error!("Error setting activity: {}", err.to_string());

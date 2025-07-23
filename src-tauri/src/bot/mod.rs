@@ -1,9 +1,8 @@
-use std::{error::Error, sync::{Arc, OnceLock}};
+use std::{error::Error, sync::{Arc, Mutex, MutexGuard, OnceLock}};
 
 use event_handler::EventHandler;
 use serenity::{all::{GatewayIntents, Http, OnlineStatus, ShardMessenger}, Client};
 use tauri::{Manager, State};
-use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 
 use crate::{app_config::{self}, app_handle, bot::account_manager::{activity::ActivityWrapper, BotProfile}, database::{self}, event_manager::{self, events::{BotShutdownStartEvent, BotShutdownSuccessEvent}}, logging::{log_error, log_info}, timer_manager};
 
@@ -35,7 +34,7 @@ impl Bot {
         
         match user_res {
             Ok(user) => {
-                app_config::bot::initialize_bot_config(user.id.to_string()).await;
+                app_config::bot::initialize_bot_config(user.id.to_string());
                 
                 database::bot_accounts::update_account_info(&user);
 
@@ -83,8 +82,8 @@ impl Bot {
 
             shutdown_handle.abort();
 
-            event_manager::unlisten_all().await;
-            timer_manager::cancel_all().await;
+            event_manager::unlisten_all();
+            timer_manager::cancel_all();
         });
 
         Ok(_self)
@@ -95,25 +94,28 @@ impl Bot {
     }
 }
 
-pub async fn get_id() -> String {
+pub fn bot_id() -> String {
     let state = Bot::get_state();
-    let lock = state.lock_and_get().await;
+    let lock = state.lock().unwrap();
+    let bot = lock.get_bot();
 
-    return lock.id.clone();
+    return bot.id.clone();
 }
 
-pub async fn http() -> Arc<Http> {
+pub fn http() -> Arc<Http> {
     let state = Bot::get_state();
-    let lock = state.lock_and_get().await;
+    let lock = state.lock().unwrap();
+    let bot = lock.get_bot();
 
-    return lock.http.clone();
+    return bot.http.clone();
 }
 
-pub async fn shard_messenger() -> Arc<ShardMessenger> {
+pub fn shard_messenger() -> Arc<ShardMessenger> {
     let state = Bot::get_state();
-    let lock = state.lock_and_get().await;
+    let lock = state.lock().unwrap();
+    let bot = lock.get_bot();
 
-    match lock.shard_messenger.get() {
+    match bot.shard_messenger.get() {
         Some(shard) => shard.clone(),
         None => panic!("shard_messenger is not initialized")
     }
@@ -124,19 +126,12 @@ pub fn shutdown() {
 }
 
 pub trait BotStateExt {
-    async fn lock_and_get(&self) -> MappedMutexGuard<'_, Bot>;
+    fn get_bot(&self) -> &Bot;
 }
 
-impl BotStateExt for BotState {
-    /// Converts the `MutexGuard<'_, Option<Bot>>` into `MappedMutexGuard<'_, Bot>`.
-    /// Will panic if there is no active bot
-    async fn lock_and_get(&self) -> MappedMutexGuard<'_, Bot> {
-        let guard = self.lock().await;
-
-        if guard.is_none() {
-            panic!("There is no bot active");
-        }
-
-        MutexGuard::map(guard, |opt| opt.as_mut().unwrap())
+impl BotStateExt for MutexGuard<'_, Option<Bot>> {
+    /// Unwraps the bot
+    fn get_bot(&self) -> &Bot {
+        self.as_ref().expect("There is no bot active")
     }
 }

@@ -17,7 +17,7 @@ pub async fn get_random() -> ActivityWrapper {
     let database = Database::get_state();
 
     let conn = database::connection();
-    let bot_id = bot::get_id().await;
+    let bot_id = bot::bot_id();
     // TODO: Cleaner!
     let mut indexes_lock = database.random_indexes.lock().await;
     let indexes = indexes_lock.get_mut("activities").unwrap();
@@ -40,7 +40,7 @@ pub async fn get_random() -> ActivityWrapper {
         }
     }
 
-    let id = bot::get_id().await;
+    let id = bot::bot_id();
 
     let result = conn.query_one("
             SELECT id, type_num, content, url
@@ -82,7 +82,7 @@ pub async fn get_random() -> ActivityWrapper {
 
 pub async fn get_all() -> Result<Vec<DbActivity>, String> {
     let conn = database::connection();
-    let bot_id = bot::get_id().await;
+    let bot_id = bot::bot_id();
 
     let mut stmt = conn
         .prepare("
@@ -114,7 +114,7 @@ pub async fn insert() -> Result<(), String> {
 
     let mut indexes_lock = database.random_indexes.lock().await;
     let indexes = indexes_lock.get_mut("activities").unwrap();
-    let bot_id = bot::get_id().await;
+    let bot_id = bot::bot_id();
 
     conn.execute(
         "

@@ -41,7 +41,7 @@ impl serenity::prelude::EventHandler for EventHandler {
                 profile.username = new.name.clone();
                 profile.avatar_url = new.avatar_url().unwrap_or("".into());
                 profile.banner_url = new.banner_url().unwrap_or("".into());
-            }).await;
+            });
 
             database::bot_accounts::update_account_info(&new);
         };
@@ -54,7 +54,7 @@ impl serenity::prelude::EventHandler for EventHandler {
             bot::account_manager::edit_profile(|profile| {
                 profile.status = new_data.status;
                 profile.activity = ActivityWrapper::from_presence(new_data);
-            }).await;
+            });
         };
     }
 }

@@ -2,7 +2,7 @@ use crate::timer_manager;
 
 #[tauri::command]
 pub async fn timer_run_early(name: String) -> Result<(), String> {
-    match timer_manager::get_timer(name.as_str()).await {
+    match timer_manager::get_timer(name.as_str()) {
         Some(timer) => {
             timer.run_early();
 
@@ -14,7 +14,7 @@ pub async fn timer_run_early(name: String) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn timer_reset(name: String) -> Result<(), String> {
-    match timer_manager::get_timer(name.as_str()).await {
+    match timer_manager::get_timer(name.as_str()) {
         Some(timer) => {
             timer.reset();
 
@@ -26,7 +26,7 @@ pub async fn timer_reset(name: String) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn timer_get_time_left(name: String) -> Result<u128, String> {
-    match timer_manager::get_timer(name.as_str()).await {
+    match timer_manager::get_timer(name.as_str()) {
         Some(timer) => {
             Ok(timer.get_time_left().await)
         }

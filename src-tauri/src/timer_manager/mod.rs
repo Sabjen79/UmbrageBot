@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use tauri::{Manager, State};
-use tokio::sync::Mutex;
+use std::sync::Mutex;
 
 use crate::{app_handle, timer_manager::timer::{Timer, TimerBuilder}};
 
@@ -30,18 +30,18 @@ pub fn new_timer(name: &str) -> TimerBuilder
     TimerBuilder::new(name)
 }
 
-pub async fn get_timer(name: &str) -> Option<Arc<Timer>> {
+pub fn get_timer(name: &str) -> Option<Arc<Timer>> {
     let state = TimerManager::get_state();
 
-    let timers = state.timers.lock().await;
+    let timers = state.timers.lock().unwrap();
 
     timers.get(name).map(|t| t.clone())
 }
 
-pub async fn cancel_all() {
+pub fn cancel_all() {
     let state = TimerManager::get_state();
 
-    let mut timers = state.timers.lock().await;
+    let mut timers = state.timers.lock().unwrap();
 
     timers.iter().for_each(|t| t.1.cancel());
 
@@ -49,9 +49,9 @@ pub async fn cancel_all() {
 }
 
 pub(in crate::timer_manager)
-async fn register_timer(name: &str, timer: Arc<Timer>) {
+fn register_timer(name: &str, timer: Arc<Timer>) {
     let state = TimerManager::get_state();
 
-    let mut timers = state.timers.lock().await;
+    let mut timers = state.timers.lock().unwrap();
     timers.insert(name.to_string(), timer);
 }

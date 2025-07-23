@@ -1,7 +1,6 @@
 use std::error::Error;
 use std::{future::Future, pin::Pin, sync::Arc, time::Duration};
 
-use tokio::runtime::Handle;
 use tokio::sync::Notify;
 
 use tokio::sync::Mutex;
@@ -81,11 +80,7 @@ impl TimerBuilder {
             self.duration_handler.as_ref().unwrap().clone()
         ));
 
-        tokio::task::block_in_place(|| {
-            Handle::current().block_on(async {
-                timer_manager::register_timer(self.name.as_str(), timer.clone()).await;
-            });
-        });
+        timer_manager::register_timer(self.name.as_str(), timer.clone());
         
         return timer
     } 

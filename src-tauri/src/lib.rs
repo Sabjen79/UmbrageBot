@@ -2,7 +2,7 @@ use std::sync::OnceLock;
 
 use tauri::{menu::{Menu, MenuItem}, tray::{MouseButton, TrayIconBuilder, TrayIconEvent}, AppHandle, Manager};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
-use tokio::sync::Mutex;
+use std::sync::Mutex;
 
 use crate::{app_config::AppConfiguration, bot::Bot, database::Database, event_manager::EventManager, timer_manager::TimerManager};
 
