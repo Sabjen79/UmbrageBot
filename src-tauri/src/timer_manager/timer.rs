@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::{future::Future, pin::Pin, sync::Arc, time::Duration};
 
 use tokio::runtime::Handle;
@@ -6,6 +7,7 @@ use tokio::sync::Notify;
 use tokio::sync::Mutex;
 use tokio::time::Instant;
 
+use crate::logging::log_error;
 use crate::timer_manager;
 
 // This is the best method I found for passing async closures as struct fields
@@ -18,8 +20,13 @@ pub type AsyncClosure<T> = Box<
         + Sync
 >;
 
-type Action = Arc<Mutex<AsyncClosure<()>>>;
-type DurationHandler = Arc<Mutex<AsyncClosure<Duration>>>;
+type Action = Arc<Mutex<AsyncClosure<
+    Result<(), Box<dyn Error>>
+>>>;
+
+type DurationHandler = Arc<Mutex<AsyncClosure<
+    Result<Duration, Box<dyn Error>>
+>>>;
 
 //============================================================================
 
@@ -42,7 +49,7 @@ impl TimerBuilder {
     pub fn action<F, Fut>(&mut self, mut action: F) -> &mut Self
     where
         F: FnMut() -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = ()> + Send + 'static,
+        Fut: Future<Output = Result<(), Box<dyn Error>>> + Send + 'static,
     {
         self.action = Some(Arc::new(Mutex::new(Box::new(move || Box::pin(action())))));
 
@@ -52,7 +59,7 @@ impl TimerBuilder {
     pub fn duration_handler<F, Fut>(&mut self, mut action: F) -> &mut Self
     where
         F: FnMut() -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = Duration> + Send + 'static,
+        Fut: Future<Output = Result<Duration, Box<dyn Error>>> + Send + 'static,
     {
         self.duration_handler = Some(Arc::new(Mutex::new(Box::new(move || Box::pin(action())))));
 
@@ -69,6 +76,7 @@ impl TimerBuilder {
         }
 
         let timer = Arc::new(Timer::new(
+            self.name.clone(),
             self.action.as_ref().unwrap().clone(), 
             self.duration_handler.as_ref().unwrap().clone()
         ));
@@ -87,6 +95,7 @@ impl TimerBuilder {
 
 pub struct Timer
 {
+    name: String,
     action: Action,
     deadline: Arc<Mutex<Instant>>,
     duration_handler: DurationHandler,
@@ -96,8 +105,9 @@ pub struct Timer
 impl Timer
 {
     pub(in crate::timer_manager)
-    fn new(action: Action, duration_handler: DurationHandler) -> Self {
+    fn new(name: String, action: Action, duration_handler: DurationHandler) -> Self {
         Self {
+            name: name,
             action: action,
             deadline: Arc::new(Mutex::new(Instant::now())),
             duration_handler: duration_handler,
@@ -105,7 +115,21 @@ impl Timer
         }
     }
 
+    pub fn start_and_run(&self) {
+        self.start();
+
+        let timer_name = self.name.clone();
+        let action = self.action.clone();
+        tokio::spawn(async move {
+            let mut action = action.lock().await;
+            if let Err(err) = (action)().await {
+                log_error!("{} action error: {}", timer_name, err.to_string());
+            };
+        });
+    }
+
     pub fn start(&self) {
+        let timer_name = self.name.clone();
         let notify = self.notify.clone();
         let action = self.action.clone();
         let duration_action = self.duration_handler.clone();
@@ -121,7 +145,11 @@ impl Timer
 
                                 let duration = (*duration_action)().await;
 
-                                Instant::now() + duration
+                                if let Err(err) = &duration {
+                                    log_error!("{} duration error: {}", timer_name.clone(), err.to_string());
+                                }
+
+                                Instant::now() + duration.unwrap_or(Duration::from_secs(300))
                             };
 
                             let d = *deadline.lock().await;
@@ -130,11 +158,14 @@ impl Timer
                         };
                         
                         tokio::time::sleep_until(deadline).await;
-
+                        
+                        let timer_name = timer_name.clone();
                         let action = action.clone();
                         tokio::spawn(async move {
                             let mut action = action.lock().await;
-                            (action)().await;
+                            if let Err(err) = (action)().await {
+                                log_error!("{} action error: {}", timer_name, err.to_string());
+                            };
                         });
                     }
                 } => (),
@@ -158,10 +189,13 @@ impl Timer
         self.cancel();
 
         let action = self.action.clone();
+        let timer_name = self.name.clone();
 
         tokio::spawn(async move {
             let mut action = action.lock().await;
-            (action)().await;
+            if let Err(err) = (action)().await {
+                log_error!("{} action error: {}", timer_name, err.to_string());
+            };
         });
 
         self.start();

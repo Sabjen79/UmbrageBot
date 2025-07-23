@@ -20,7 +20,8 @@ impl EventManager {
         }
     }
 
-    pub fn get_state() -> State<'static, EventManager> {
+    pub(in crate::event_manager)
+    fn get_state() -> State<'static, EventManager> {
         app_handle().state::<EventManager>()
     }
 }

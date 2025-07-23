@@ -30,6 +30,10 @@ pub fn run() {
             database::commands::db_insert_account,
             database::commands::db_update_account,
             database::commands::db_delete_account,
+            database::commands::db_get_all_activities,
+            database::commands::db_insert_activity,
+            database::commands::db_update_activity,
+            database::commands::db_delete_activity,
 
             app_config::commands::get_bot_config,
             app_config::commands::set_bot_config,

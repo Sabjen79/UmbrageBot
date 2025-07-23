@@ -37,7 +37,7 @@
         `}
     >
         <img
-            class="pointer-events-none"
+            class="pointer-events-none rounded-full"
             alt={$botProfile.username}
             src={$selectedBot?.avatarUrl}
         />

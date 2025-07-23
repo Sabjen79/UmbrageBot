@@ -1,6 +1,6 @@
 use serenity::{all::CurrentUser, prelude::*};
 
-use crate::{app_config::AppConfiguration, database::Database};
+use crate::{app_config::{self}, database::{self}};
 
 #[derive(serde::Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -26,7 +26,7 @@ pub async fn validate_token(token: &str) -> Result<(), String> {
         .await
         .map_err(|_| "The provided token was invalid")?;
 
-    let bots = get_all().await?;
+    let bots = get_all()?;
     for bot in bots {
         if bot.token == token {
             return Err("This bot is already added".into());
@@ -36,9 +36,8 @@ pub async fn validate_token(token: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub async fn get_all() -> Result<Vec<BotAccount>, String> {
-    let database = Database::get_state();
-    let conn = database.connection.lock().await;
+pub fn get_all() -> Result<Vec<BotAccount>, String> {
+    let conn = database::connection();
 
     let mut stmt = conn
         .prepare("SELECT id, token, name, avatar_url FROM accounts")
@@ -61,9 +60,7 @@ pub async fn get_all() -> Result<Vec<BotAccount>, String> {
 }
 
 pub async fn insert(token: &str) -> Result<(), String> {
-    let database = Database::get_state();
-
-    let conn = database.connection.lock().await;
+    let conn = database::connection();
     let user = get_bot_info(token).await?;
 
     let mut stmt = conn
@@ -91,8 +88,7 @@ pub async fn insert(token: &str) -> Result<(), String> {
 }
 
 pub async fn update_token(id: &str, new_token: &str) -> Result<(), String> {
-    let database = Database::get_state();
-    let conn = database.connection.lock().await;
+    let conn = database::connection();
     let user = get_bot_info(new_token).await?;
 
     if id != user.id {
@@ -112,17 +108,15 @@ pub async fn update_token(id: &str, new_token: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub async fn delete(id: &str, delete_data: bool) -> Result<(), String> {
-    let database = Database::get_state();
-    let conn = database.connection.lock().await;
+pub fn delete(id: &str, delete_data: bool) -> Result<(), String> {
+    let conn = database::connection();
 
     conn.execute("DELETE FROM accounts WHERE id = ?1", (&id,))
         .map_err(|err| err.to_string())?;
 
     if !delete_data { return Ok(()) }
 
-    let config_state = AppConfiguration::get_state();
-    let path = &config_state.config_path;
+    let path = app_config::config_path();
 
     if std::fs::remove_file(path).is_err() {
         return Err("Failed to delete bot config file".to_string());
@@ -131,9 +125,8 @@ pub async fn delete(id: &str, delete_data: bool) -> Result<(), String> {
     Ok(())
 }
 
-pub async fn update_account_info(user: &CurrentUser) {
-    let database = Database::get_state();
-    let conn = database.connection.lock().await;
+pub fn update_account_info(user: &CurrentUser) {
+    let conn = database::connection();
 
     conn.execute("
             UPDATE accounts

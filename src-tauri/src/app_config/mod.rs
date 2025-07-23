@@ -10,9 +10,9 @@ pub mod commands;
 
 /// Handles all operations regarding the `config` folder in `AppData`
 pub struct AppConfiguration {
-    pub config_path: String,
+    config_path: String,
     bot_config_path: Mutex<Option<String>>,
-    pub bot_config: Mutex<BotConfig>
+    bot_config: Mutex<BotConfig>
 }
 
 impl AppConfiguration {
@@ -35,7 +35,14 @@ impl AppConfiguration {
         }
     }
 
-    pub fn get_state() -> State<'static, AppConfiguration> {
+    pub(in crate::app_config)
+    fn get_state() -> State<'static, AppConfiguration> {
         app_handle().state::<AppConfiguration>()
     }
+}
+
+pub fn config_path() -> String {
+    let state = AppConfiguration::get_state();
+
+    return state.config_path.clone();
 }

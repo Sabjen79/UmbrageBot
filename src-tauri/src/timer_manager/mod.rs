@@ -19,7 +19,8 @@ impl TimerManager {
         }
     }
 
-    pub fn get_state() -> State<'static, TimerManager> {
+    pub(in crate::timer_manager)
+    fn get_state() -> State<'static, TimerManager> {
         app_handle().state::<TimerManager>()
     }
 }
@@ -27,14 +28,6 @@ impl TimerManager {
 pub fn new_timer(name: &str) -> TimerBuilder
 {
     TimerBuilder::new(name)
-}
-
-pub(in crate::timer_manager)
-async fn register_timer(name: &str, timer: Arc<Timer>) {
-    let state = TimerManager::get_state();
-
-    let mut timers = state.timers.lock().await;
-    timers.insert(name.to_string(), timer);
 }
 
 pub async fn get_timer(name: &str) -> Option<Arc<Timer>> {
@@ -53,4 +46,12 @@ pub async fn cancel_all() {
     timers.iter().for_each(|t| t.1.cancel());
 
     timers.clear();
+}
+
+pub(in crate::timer_manager)
+async fn register_timer(name: &str, timer: Arc<Timer>) {
+    let state = TimerManager::get_state();
+
+    let mut timers = state.timers.lock().await;
+    timers.insert(name.to_string(), timer);
 }

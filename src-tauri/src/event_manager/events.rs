@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use convert_case::{Case, Casing};
 use serde::{Deserialize, Serialize};
 
-use crate::bot::account_manager::BotProfile;
+use crate::{app_config::bot::BotConfig, bot::{account_manager::BotProfile}};
 
 /// Trait that adds the function `name()` to a struct to get its type name in UPPER_SNAKE_CASE
 pub trait TauriEvent {
@@ -27,7 +27,8 @@ impl_type_name!(
     BotLoginSuccessEvent,
     BotShutdownStartEvent,
     BotShutdownSuccessEvent,
-    BotProfileUpdateEvent
+    BotProfileUpdateEvent,
+    BotConfigUpdateEvent
 );
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,3 +45,15 @@ pub struct BotProfileUpdateEvent {
     pub data: BotProfile
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum BotConfigUpdateSource {
+    Frontend = 0,
+    Backend = 1
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BotConfigUpdateEvent {
+    pub source: BotConfigUpdateSource,
+    pub old_config: BotConfig,
+    pub new_config: BotConfig
+}

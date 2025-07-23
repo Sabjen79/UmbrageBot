@@ -4,19 +4,19 @@ use serde::{Deserialize, Serialize};
 use serenity::all::{ActivityData, ActivityType, Presence};
 use tauri::Url;
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ActivityWrapper {
     None,
     Playing(String),
     Streaming(String, String),
     Listening(String),
     Watching(String),
+    Competing(String),
     Custom(String),
-    Competing(String)
 }
 
 impl ActivityWrapper {
-    pub fn from_data(presence: Presence) -> ActivityWrapper {
+    pub fn from_presence(presence: Presence) -> ActivityWrapper {
         if presence.activities.is_empty() {
             return ActivityWrapper::None;
         }
@@ -39,7 +39,7 @@ impl ActivityWrapper {
         }
     }
 
-    pub fn into_data(self) -> Result<Option<ActivityData>, Box<dyn error::Error>> {
+    pub fn into_data(self) -> Result<Option<ActivityData>, Box<dyn error::Error + Send>> {
         match self {
             ActivityWrapper::Playing(name) => Ok(Some(ActivityData {
                 name,
@@ -48,12 +48,17 @@ impl ActivityWrapper {
                 url: None,
             })),
             ActivityWrapper::Streaming(name, url) => {
-                let parsed_url = Url::parse(&url)?;
+                let parsed_url = {
+                    match Url::parse(&url) {
+                        Ok(url) => Some(url),
+                        Err(_) => None
+                    }
+                };
                 Ok(Some(ActivityData {
                     name,
                     kind: ActivityType::Streaming,
                     state: None,
-                    url: Some(parsed_url),
+                    url: parsed_url,
                 }))
             }
             ActivityWrapper::Listening(name) => Ok(Some(ActivityData {

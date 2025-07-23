@@ -12,8 +12,9 @@ pub mod account_manager;
 pub mod commands;
 
 pub struct Bot {
+    id: String,
     http: Arc<Http>,
-    shard_messenger: OnceLock<ShardMessenger>,
+    shard_messenger: OnceLock<Arc<ShardMessenger>>,
     profile: Mutex<BotProfile>
 }
 
@@ -30,12 +31,15 @@ impl Bot {
         let user_res = client.http.get_current_user().await;
 
         let profile: BotProfile;
+        let id;
         
         match user_res {
             Ok(user) => {
                 app_config::bot::initialize_bot_config(user.id.to_string()).await;
                 
-                database::bot_accounts::update_account_info(&user).await;
+                database::bot_accounts::update_account_info(&user);
+
+                id = user.id.to_string();
 
                 profile = BotProfile {
                     username: user.name.clone(),
@@ -51,6 +55,7 @@ impl Bot {
         }
 
         let _self = Self {
+            id: id,
             http: client.http.clone(),
             shard_messenger: OnceLock::new(),
             profile: Mutex::new(profile)
@@ -85,20 +90,37 @@ impl Bot {
         Ok(_self)
     }
 
-    pub fn get_state() -> State<'static, BotState> {
+    fn get_state() -> State<'static, BotState> {
         return app_handle().state::<BotState>();
     }
+}
 
-    pub fn shard_messenger(&self) -> &ShardMessenger {
-        match self.shard_messenger.get() {
-            Some(shard) => shard,
-            None => panic!("shard_messenger is not initialized")
-        }
-    }
+pub async fn get_id() -> String {
+    let state = Bot::get_state();
+    let lock = state.lock_and_get().await;
 
-    pub fn shutdown() {
-        event_manager::emit(BotShutdownStartEvent);
+    return lock.id.clone();
+}
+
+pub async fn http() -> Arc<Http> {
+    let state = Bot::get_state();
+    let lock = state.lock_and_get().await;
+
+    return lock.http.clone();
+}
+
+pub async fn shard_messenger() -> Arc<ShardMessenger> {
+    let state = Bot::get_state();
+    let lock = state.lock_and_get().await;
+
+    match lock.shard_messenger.get() {
+        Some(shard) => shard.clone(),
+        None => panic!("shard_messenger is not initialized")
     }
+}
+
+pub fn shutdown() {
+    event_manager::emit(BotShutdownStartEvent);
 }
 
 pub trait BotStateExt {

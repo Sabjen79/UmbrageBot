@@ -1,4 +1,4 @@
-use crate::{bot::Bot, event_manager::{self, events::{BotLoginSuccessEvent, BotShutdownSuccessEvent}}, logging::log_error};
+use crate::{bot::{self, Bot}, event_manager::{self, events::{BotLoginSuccessEvent, BotShutdownSuccessEvent}}, logging::log_error};
 
 #[tauri::command]
 pub async fn start_bot(token: String) -> Result<(), String> {
@@ -29,7 +29,7 @@ pub async fn shutdown_bot() -> Result<(), String> {
     
     {
         if let Some(_) = &*bot_state.lock().await {
-            Bot::shutdown();
+            bot::shutdown();
 
             event_manager::wait(BotShutdownSuccessEvent).await;
         }

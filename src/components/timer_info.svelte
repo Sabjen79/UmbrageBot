@@ -8,13 +8,21 @@
 
     let time = $state(0);
     let controllable = $state(true);
-    
-    setInterval(async () => {
-        await readTime();
-    }, 1000);
+
+    $effect(() => {
+        readTime();
+        
+        const interval = setInterval(async () => {
+            await readTime();
+        }, 1000);
+
+        return () => {
+            clearInterval(interval);
+        };
+    });
 
     async function readTime() {
-        time = await invoke("timer_get_time_left", { name: "BOT_TEST_TIMER" })
+        time = await invoke("timer_get_time_left", { name: timer_name })
     }
 
     function parseTime() {
@@ -39,7 +47,7 @@
 
 <div
     class={`
-        h-12 mx-2 my-4 select-none
+        h-12 select-none flex-1
         flex items-center
         bg-gray-950 rounded-4xl
         outline-1 outline-gray-800

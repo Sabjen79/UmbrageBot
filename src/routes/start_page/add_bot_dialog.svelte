@@ -16,6 +16,7 @@
     let dialog: Dialog;
     let token = $state("");
     let tokenValidated = $state(false);
+    let textInput: TextInput;
 
     export function open() {
         token = "";
@@ -36,6 +37,7 @@
         </p>
 
         <TextInput 
+            bind:this={textInput}
             bind:value={token} 
             placeholder="Token"
             fastValidation={true}
@@ -58,14 +60,18 @@
                     await invoke("db_insert_account", {token: token}).then(async () => {
                         await refreshBots();
                         dialog.close();
-                    })
+                    }).catch((e) => {
+                        textInput.setError(e);
+                    });
                 }}/>
             {:else}
                 <Button text="Update Token" disabled={!tokenValidated} onclick={async () => {
                     await invoke("db_update_account", {id: botAccount.id, newToken: token}).then(async () => {
                         await refreshBots();
                         dialog.close();
-                    })
+                    }).catch((e) => {
+                        textInput.setError(e);
+                    });
                 }}/>
             {/if}
             

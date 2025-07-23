@@ -5,7 +5,7 @@
 import SettingsRow from "../../../components/settings_row.svelte";
     import { selectedBot } from "../../../stores/bot_accounts_store";
     import TabSelector from "./tab_selector.svelte";
-    import UsernameTab from "./username_tab.svelte";
+    import ActivityTab from "./tabs/activity_tab.svelte";
     import { goto } from "$app/navigation";
     import { botProfile } from "../../../stores/bot_profile_store";
     import TopBanner from "./top_banner.svelte";
@@ -17,10 +17,10 @@ import SettingsRow from "../../../components/settings_row.svelte";
 
 <div
     class={`
-        w-full px-2 mt-2
+        w-full px-2 mt-2 overflow-visible
     `}
 >
-    {#each ["Username", "Status", "Avatar", "Banner"] as selector, index}
+    {#each ["Activity", "Avatar", "Banner"] as selector, index}
         <TabSelector text={selector} active={tabIndex == index} onclick={() => {
             tabIndex = index
         }}/>
@@ -33,16 +33,18 @@ import SettingsRow from "../../../components/settings_row.svelte";
         style="transform: translateX({tabIndex * 100}%)"
     ></div>
     
-    <div class="w-full overflow-x-clip">
-        <div
-            class={`flex w-[400%] duration-250 ease-out`}
-            style="transform: translateX(-{tabIndex * 100/4}%)"
-        >
-            <UsernameTab />
-            <UsernameTab />
-            <UsernameTab />
-            <UsernameTab />
-        </div>
+    <div class="w-full overflow-visible">
+        {#if tabIndex == 0}
+            <ActivityTab />
+        {/if}
+
+        {#if tabIndex == 1}
+            <ActivityTab />
+        {/if}
+
+        {#if tabIndex == 2}
+            <ActivityTab />
+        {/if}
     </div>
     
 </div>
