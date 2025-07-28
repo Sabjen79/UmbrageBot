@@ -1,12 +1,12 @@
 use rand::seq::SliceRandom;
 use rusqlite::params;
 
-use crate::{database, logging::log_error};
+use crate::{database::{self, Database}, logging::log_error};
 
 
 pub(in crate::database)
 struct RandomIndexGenerator {
-    table_name: String,
+    pub table_name: String,
     bot_id: String,
     list: Vec<u16>
 }
@@ -56,4 +56,16 @@ impl RandomIndexGenerator {
             }
         }
     }
+}
+
+pub fn create_indexes(bot_id: &String) {
+    let db = Database::get_state();
+
+    let mut list = db.random_indexes.lock().unwrap();
+
+    list.clear();
+
+    list.push(RandomIndexGenerator::new("activities", bot_id));
+
+    list.iter_mut().for_each(|f| f.generate());
 }

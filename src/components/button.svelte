@@ -4,6 +4,8 @@
     let {
         text = "",
         icon = "",
+        rounded = false,
+        small = false,
         isRed = false,
         disabled = $bindable(false),
         onclick = async () => {
@@ -22,7 +24,8 @@
         ${text == "" ? "w-10" : ""}
         relative flex items-center justify-center
         overflow-visible m-1 p-0 scheme-only-light
-        text-primary-100 border-1 rounded-sm float-left duration-200
+        text-primary-100 border-1 float-left duration-200
+        ${rounded ? "rounded-full" : "rounded-sm"}
         ${hover && !waiting && !disabled ? "cursor-pointer" : "cursor-auto"}
 
         ${disabled ? "bg-gray-800" 
@@ -81,7 +84,7 @@
         id="content"
         class={`
             relative flex items-center justify-center
-            px-3 py-1.5 text-base
+            ${small ? "" : "px-3 py-1.5 text-base"}
             bg-transparent duration-100
             opacity-${waiting ? "0" : "100"}
         `}
@@ -92,6 +95,7 @@
                 {icon}
             </span>
         {/if}
+
         {text}
     </div>
 </button>

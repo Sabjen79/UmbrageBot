@@ -9,8 +9,11 @@ import SettingsRow from "../../../components/settings_row.svelte";
     import { goto } from "$app/navigation";
     import { botProfile } from "../../../stores/bot_profile_store";
     import TopBanner from "./top_banner.svelte";
+    import { botConfig } from "../../../stores/bot_config_store";
 
-    let tabIndex = 0;
+    let tabIndex = $state(0);
+
+    let test = $derived($botConfig);
 </script>
 
 <TopBanner/>

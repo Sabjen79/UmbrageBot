@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+    import { tick } from 'svelte';
+    import { botConfig } from '../../stores/bot_config_store';
     import Sidebar from './sidebar.svelte';
 
 	let { children } = $props();
@@ -23,7 +25,6 @@
             {@render children()}
         </div>
     </div>
-    
 
 </main>
 

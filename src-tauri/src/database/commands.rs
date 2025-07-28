@@ -29,20 +29,20 @@ pub async fn db_delete_account(id: String, delete_data: bool) -> Result<(), Stri
 
 #[tauri::command]
 pub async fn db_get_all_activities() -> Result<Vec<DbActivity>, String> {
-    database::activities::get_all().await
+    database::activities::get_all()
 }
 
 #[tauri::command]
 pub async fn db_insert_activity() -> Result<(), String> {
-    database::activities::insert().await
+    database::activities::insert()
 }
 
 #[tauri::command]
 pub async fn db_update_activity(activity: DbActivity) -> Result<(), String> {
-    database::activities::update(activity).await
+    database::activities::update(activity)
 }
 
 #[tauri::command]
 pub async fn db_delete_activity(id: &str) -> Result<(), String> {
-    database::activities::delete(id).await
+    database::activities::delete(id)
 }

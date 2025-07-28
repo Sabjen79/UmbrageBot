@@ -6,7 +6,6 @@ use crate::bot::account_manager::activity::ActivityWrapper;
 use crate::database;
 use crate::event_manager;
 use crate::event_manager::events::BotLoginSuccessEvent;
-use crate::logging::log_error;
 use crate::logging::log_info;
 
 pub struct EventHandler;
@@ -18,13 +17,7 @@ impl serenity::prelude::EventHandler for EventHandler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         let current_user = ctx.http.get_current_user().await.unwrap();
 
-        database::create_indexes(&current_user.id.to_string()).await;
-
-        tokio::task::spawn(async move {
-            if let Err(err) = database::activities::insert().await {
-                log_error!("{}", err);
-            }
-        });
+        database::random::create_indexes(&current_user.id.to_string());
 
         bot::account_manager::initialize(&ctx).await;
 

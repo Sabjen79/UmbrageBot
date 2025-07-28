@@ -13,14 +13,15 @@ pub struct DbActivity {
     url: String
 }
 
-pub async fn get_random() -> ActivityWrapper {
+pub fn get_random() -> ActivityWrapper {
     let database = Database::get_state();
 
     let conn = database::connection();
     let bot_id = bot::bot_id();
-    // TODO: Cleaner!
-    let mut indexes_lock = database.random_indexes.lock().await;
-    let indexes = indexes_lock.get_mut("activities").unwrap();
+
+    let mut indexes_lock = database.random_indexes.lock().unwrap();
+    let indexes = indexes_lock.iter_mut()
+        .find(|a| a.table_name.eq("activities")).unwrap();
 
     let count: Result<u8, _> = conn.query_one(
         "SELECT COUNT(*) FROM activities WHERE bot_id = ?1", 
@@ -80,7 +81,7 @@ pub async fn get_random() -> ActivityWrapper {
     }
 }
 
-pub async fn get_all() -> Result<Vec<DbActivity>, String> {
+pub fn get_all() -> Result<Vec<DbActivity>, String> {
     let conn = database::connection();
     let bot_id = bot::bot_id();
 
@@ -89,6 +90,7 @@ pub async fn get_all() -> Result<Vec<DbActivity>, String> {
             SELECT id, type_num, content, url
             FROM activities
             WHERE bot_id = ?1
+            ORDER BY id DESC
         ")
         .map_err(|err| err.to_string())?;
 
@@ -108,12 +110,13 @@ pub async fn get_all() -> Result<Vec<DbActivity>, String> {
     Ok(result)
 }
 
-pub async fn insert() -> Result<(), String> {
+pub fn insert() -> Result<(), String> {
     let database = Database::get_state();
     let conn = database::connection();
 
-    let mut indexes_lock = database.random_indexes.lock().await;
-    let indexes = indexes_lock.get_mut("activities").unwrap();
+    let mut indexes_lock = database.random_indexes.lock().unwrap();
+    let indexes = indexes_lock.iter_mut()
+        .find(|a| a.table_name.eq("activities")).unwrap();
     let bot_id = bot::bot_id();
 
     conn.execute(
@@ -136,7 +139,7 @@ pub async fn insert() -> Result<(), String> {
     Ok(())
 }
 
-pub async fn update(activity: DbActivity) -> Result<(), String> {
+pub fn update(activity: DbActivity) -> Result<(), String> {
     let conn = database::connection();
     
     conn.execute(
@@ -152,12 +155,13 @@ pub async fn update(activity: DbActivity) -> Result<(), String> {
     Ok(())
 }
 
-pub async fn delete(id: &str) -> Result<(), String> {
+pub fn delete(id: &str) -> Result<(), String> {
     let database = Database::get_state();
     let conn = database::connection();
     
-    let mut indexes_lock = database.random_indexes.lock().await;
-    let indexes = indexes_lock.get_mut("activities").unwrap();
+    let mut indexes_lock = database.random_indexes.lock().unwrap();
+    let indexes = indexes_lock.iter_mut()
+        .find(|a| a.table_name.eq("activities")).unwrap();
 
     conn.execute("DELETE FROM activities WHERE id = ?1", [id])
         .map_err(|err| err.to_string())?;

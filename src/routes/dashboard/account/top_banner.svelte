@@ -9,12 +9,15 @@
     import ContextMenu from "../../../components/context_menu/context_menu.svelte";
     import ContextMenuItem from "../../../components/context_menu/context_menu_item.svelte";
     import ContextMenuCustomItem from "../../../components/context_menu/context_menu_custom_item.svelte";
+    import { onMount } from "svelte";
+    import { botConfig } from "../../../stores/bot_config_store";
 
     let dialog: Dialog;
     let usernameTextInput: TextInput;
     let username = $state("");
 
     let statusContextMenu: ContextMenu;
+    let root: HTMLElement;
 
     let statusList = new Map<string, Array<string>>([
         ["online", ["Online", "#43A25A"]],
@@ -22,9 +25,32 @@
         ["dnd", ["Do not Disturb", "#D83A42"]],
         ["invisible", ["Invisible", "#82838B"]]
     ]);
+
+    function getStatus() {
+        const activity = $botProfile.activity!;
+
+        // Horrible code but it's an useless feature
+        // I can live without it
+        if(activity.Playing) {
+            return "Playing " + activity.Playing;
+        } else if(activity.Streaming) {
+            return "Streaming " + activity.Streaming;
+        } else if(activity.Listening) {
+            return "Listening to " + activity.Listening;
+        } else if(activity.Watching) {
+            return "Watching " + activity.Watching;
+        } else if(activity.Competing) {
+            return "Competing in " + activity.Competing;
+        } else if(activity.Custom) {
+            return activity.Custom;
+        }
+
+        return '';
+    }
+    
 </script>
 
-<div
+<div bind:this={root}
     class={`
         w-full h-40 bg-gray-800 rounded-md shadow-container
         flex items-center relative
@@ -73,6 +99,17 @@
         >
             {$botProfile.username}
         </button>
+
+        {#if $botProfile.activity}
+            <div
+                class={`
+                    select-none duration-200 text-gray-200
+                `}
+            >
+                {getStatus()}
+            </div>
+        {/if}
+        
     </div>
 
     <div

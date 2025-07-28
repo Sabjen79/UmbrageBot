@@ -72,7 +72,7 @@ pub async fn initialize(ctx: &Context) {
                 return Ok(());
             }
 
-            let activity = database::activities::get_random().await;
+            let activity = database::activities::get_random();
 
             set_activity(activity).await;
 

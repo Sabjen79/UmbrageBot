@@ -9,6 +9,8 @@
         value_list: number[]
     } = $props();
 
+    // TODO: Rework this
+
     let indexes = $derived([value_list.indexOf(value_min), value_list.indexOf(value_max)]);
     let selected = $state(0);
     let isFixed = $derived(value_min == value_max);
@@ -16,10 +18,14 @@
     let drag = $state(false);
 
     let sliderEl: HTMLDivElement;
-    let tooltip: HTMLDivElement[] = [];
+    let tooltip: HTMLOrSVGElement[] = [];
 
     let tooltipPos = $derived.by(() => {
         if (!sliderEl) return { left: [0, 0], top: 0 };
+
+        const _tmp1 = hovers[0];
+        const _tmp2 = hovers[1];
+
         const sliderRect = sliderEl.getBoundingClientRect();
         const handleLeft1 = sliderRect.left + (indexes[0] * sliderRect.width / (value_list.length - 1));
         const handleLeft2 = sliderRect.left + (indexes[1] * sliderRect.width / (value_list.length - 1));
@@ -161,17 +167,21 @@
             {/each}
 
             {#each { length: 2 } as _, i}
-                <div
+                <svg
                     class={`
-                        absolute bg-gray-200 w-4 h-4 rounded-full
-                        -top-1.25 duration-100
+                        absolute bg-transparent w-4 h-4 rounded-full
+                        -top-1.25 duration-100 scale-115
                     `}
                     style="left: calc({indexes[i] * 100 / (value_list.length - 1)}% - 7.5px);"
                     onmouseenter={() => hovers[i] = true}
                     onmouseleave={() => hovers[i] = false}
                     bind:this={tooltip[i]}
-                >
-                </div>
+                viewBox="0 0 200 173.20508075688772">
+                    <path
+                        fill="var(--color-gray-200)"
+                        d="M0 86.60254037844386L50 0L150 0L200 86.60254037844386L150 173.20508075688772L50 173.20508075688772Z">
+                    </path>
+                </svg>
             {/each}
             
         </div>

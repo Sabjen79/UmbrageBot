@@ -1,9 +1,9 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use r2d2::{Pool, PooledConnection};
 use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{Manager, State};
-use tokio::sync::Mutex;
+use std::sync::Mutex;
 
 use crate::{app_config::{self}, app_handle, database::random::RandomIndexGenerator, logging::log_info};
 
@@ -15,7 +15,7 @@ pub mod random;
 /// Manager responsible for database operations
 pub struct Database {
     connection_pool: Arc<Pool<SqliteConnectionManager>>,
-    random_indexes: Mutex<HashMap<String, RandomIndexGenerator>>
+    random_indexes: Mutex<Vec<RandomIndexGenerator>>
 }
 
 const CREATE_DB_SQL: &'static str = include_str!("scripts/create_db.sql");
@@ -28,7 +28,7 @@ impl Database {
 
         let _self = Self {
             connection_pool: Arc::new(r2d2::Pool::new(manager).unwrap()),
-            random_indexes: Mutex::new(HashMap::new())
+            random_indexes: Mutex::new(Vec::new())
         };
 
         let conn = _self.connection_pool.clone();
@@ -50,16 +50,4 @@ pub fn connection() -> PooledConnection<SqliteConnectionManager> {
     let db = Database::get_state();
 
     db.connection_pool.clone().get().unwrap()
-}
-
-pub async fn create_indexes(bot_id: &String) {
-    let db = Database::get_state();
-
-    let mut list = db.random_indexes.lock().await;
-
-    list.clear();
-
-    list.insert("activities".to_string(), RandomIndexGenerator::new("activities", bot_id));
-
-    list.iter_mut().for_each(|f| f.1.generate());
 }
